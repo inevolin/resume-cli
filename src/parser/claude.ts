@@ -77,7 +77,7 @@ export class ClaudeParser implements HistoryParser {
 
     const timestamp = sessionTime ?? new Date();
 
-    // Derive project path from the grandparent directory name.
+    // Derive project path from the immediate parent directory (the encoded project dir).
     // Layout: ~/.claude/projects/<encoded-project-path>/<uuid>.jsonl
     const project = path.dirname(filePath);
 
