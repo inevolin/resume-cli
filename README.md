@@ -96,17 +96,49 @@ Then type `/histd` in Claude Code, Codex, or Copilot CLI to get a one-line-per-s
 
 ## Usage
 
-Once configured, your AI agent can call:
+### Slash command (recommended)
+
+After running `npx skills add inevolin/histd`, type `/histd` at the start of any session:
 
 ```
-get_recent_context(project_path: "/Users/you/my-project", limit: 5)
+/histd
 ```
 
-Or ask it naturally:
+The agent calls `get_recent_context` for the current directory and replies with a one-line summary per session plus a short recap of recent decisions.
+
+### Natural language
+
+Just ask at the start of a session:
 
 > "Check my recent history for this project before we start."
+> "What was I working on here last time?"
+> "Restore context from my previous sessions."
 
-The agent will call `get_recent_context` with the current working directory and receive the last N sessions across all supported tools, newest first.
+### Direct tool call
+
+You can also invoke the tool explicitly:
+
+**Claude Code:**
+```
+Use the histd-local get_recent_context tool for /Users/you/my-project
+```
+
+**Codex / Copilot CLI:**
+```
+Call the histd get_recent_context tool with project_path='/Users/you/my-project'
+```
+
+**Non-interactive (scripting):**
+```bash
+# Claude Code
+claude -p "Use the histd-local get_recent_context tool for $(pwd)" --dangerously-skip-permissions
+
+# Codex
+codex exec "Call the histd get_recent_context tool for $(pwd)" --yolo
+
+# Copilot CLI
+gh copilot -- -p "Call the histd get_recent_context tool for $(pwd)" --yolo --silent
+```
 
 ## Tool Reference
 
