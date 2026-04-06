@@ -1,7 +1,7 @@
 {
   "name": "histd",
   "version": "1.0.0",
-  "description": "A lightweight daemon that syncs your AI coding sessions into searchable Markdown files.",
+  "description": "MCP server that lets AI agents query your cross-tool coding session history (Claude Code, Cursor, Copilot, Codex).",
   "main": "dist/index.js",
   "bin": {
     "histd": "dist/index.js"
@@ -20,9 +20,11 @@
     "ai",
     "claude",
     "cursor",
+    "copilot",
+    "codex",
+    "mcp",
     "history",
-    "daemon",
-    "markdown"
+    "context"
   ],
   "author": "",
   "license": "MIT",
