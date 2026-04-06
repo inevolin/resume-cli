@@ -2,74 +2,100 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { HistoryParser, Message, Session } from './types.js';
 
-interface RawMessage {
-  role?: unknown;
-  content?: unknown;
+/**
+ * One record in a Codex session JSONL file.
+ * Codex stores sessions under ~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl
+ */
+interface CodexRecord {
+  timestamp?: string;
+  type?: string;
+  payload?: {
+    id?: string;
+    timestamp?: string;
+    cwd?: string;
+    role?: string;
+    content?: unknown; // string or array of {type, text} blocks
+  };
+}
+
+interface ContentBlock {
+  type?: string;
+  text?: string;
 }
 
 /**
- * Parses OpenAI Codex CLI session files stored under ~/.codex/history/.
- *
- * Supports two JSON shapes:
- *   1. Top-level array of {role, content} objects
- *   2. Wrapper object with a "messages" or "conversation" key
- *
- * Content may be a plain string or an array of {type, text} blocks.
+ * Parses Codex CLI session files stored under
+ * ~/.codex/sessions/<year>/<month>/<day>/rollout-*.jsonl
  */
 export class CodexParser implements HistoryParser {
   canHandle(filePath: string): boolean {
-    return filePath.includes(`${path.sep}.codex${path.sep}`) && filePath.endsWith('.json');
+    return (
+      filePath.endsWith('.jsonl') &&
+      filePath.includes(`${path.sep}.codex${path.sep}sessions${path.sep}`)
+    );
   }
 
   async parse(filePath: string): Promise<Session[]> {
-    let raw: unknown;
-    try {
-      raw = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    } catch {
-      return [];
-    }
-
-    const rawMessages = extractMessageArray(raw);
+    const data = fs.readFileSync(filePath, 'utf8');
     const messages: Message[] = [];
+    let sessionTime: Date | null = null;
+    let projectCwd: string | null = null;
 
-    for (const item of rawMessages) {
-      if (!item || typeof item !== 'object') continue;
-      const m = item as RawMessage;
-      const role = typeof m.role === 'string' ? m.role : '';
+    for (const line of data.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+
+      let rec: CodexRecord;
+      try {
+        rec = JSON.parse(trimmed) as CodexRecord;
+      } catch {
+        continue;
+      }
+
+      // session_meta carries the canonical start time and working directory.
+      if (rec.type === 'session_meta' && rec.payload) {
+        if (!sessionTime) {
+          const raw = rec.payload.timestamp ?? rec.timestamp;
+          if (raw) {
+            const t = new Date(raw);
+            if (!isNaN(t.getTime())) sessionTime = t;
+          }
+        }
+        if (!projectCwd && rec.payload.cwd) {
+          projectCwd = rec.payload.cwd;
+        }
+      }
+
+      if (rec.type !== 'response_item') continue;
+      const payload = rec.payload;
+      if (!payload) continue;
+
+      const role = typeof payload.role === 'string' ? payload.role : '';
       if (role !== 'user' && role !== 'assistant') continue;
-      const content = extractContent(m.content);
+
+      const content = extractContent(payload.content);
       if (!content) continue;
+
       messages.push({ role, content });
     }
 
     if (messages.length === 0) return [];
 
-    const project = path.dirname(filePath);
-    const timestamp = fileTimestamp(filePath);
+    const timestamp = sessionTime ?? fileTimestamp(filePath);
+    const project = projectCwd ?? path.dirname(filePath);
 
     return [{ tool: 'Codex', project, timestamp, messages }];
   }
-}
-
-function extractMessageArray(raw: unknown): unknown[] {
-  if (Array.isArray(raw)) return raw;
-  if (raw && typeof raw === 'object') {
-    const obj = raw as Record<string, unknown>;
-    for (const key of ['messages', 'conversation']) {
-      if (Array.isArray(obj[key])) return obj[key] as unknown[];
-    }
-  }
-  return [];
 }
 
 function extractContent(v: unknown): string {
   if (typeof v === 'string') return v.trim();
   if (Array.isArray(v)) {
     return v
-      .filter((b): b is { type: string; text: string } =>
-        b != null && typeof b === 'object' && typeof (b as Record<string, unknown>).text === 'string'
+      .filter((b): b is ContentBlock =>
+        b != null && typeof b === 'object' && typeof (b as ContentBlock).text === 'string'
       )
-      .map((b) => b.text)
+      .map((b) => b.text as string)
       .join('\n')
       .trim();
   }
