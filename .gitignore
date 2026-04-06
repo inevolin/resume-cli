@@ -1,6 +1,5 @@
-# Node.js dependencies and build artifacts
+# Node.js dependencies
 node_modules/
-dist/
 
 # OS files
 .DS_Store

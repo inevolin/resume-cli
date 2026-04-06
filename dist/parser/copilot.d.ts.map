@@ -1,0 +1,1 @@
+{"version":3,"file":"copilot.d.ts","sourceRoot":"","sources":["../../src/parser/copilot.ts"],"names":[],"mappings":"AAEA,OAAO,EAAE,aAAa,EAAW,OAAO,EAAE,MAAM,YAAY,CAAC;AAkB7D;;;GAGG;AACH,qBAAa,aAAc,YAAW,aAAa;IACjD,SAAS,CAAC,QAAQ,EAAE,MAAM,GAAG,OAAO;IAO9B,KAAK,CAAC,QAAQ,EAAE,MAAM,GAAG,OAAO,CAAC,OAAO,EAAE,CAAC;CAgDlD"}
