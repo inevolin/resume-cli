@@ -32,16 +32,14 @@ describe('getEntries — Linux', () => {
     );
   });
 
-  it('includes copilot with VSCode Linux config path', () => {
+  it('includes copilot pointing at ~/.copilot/session-state', () => {
     const entry = getEntries().find((e) => e.tool === 'copilot');
-    expect(entry!.paths).toContain(
-      `${FAKE_HOME}/.config/Code/User/workspaceStorage`
-    );
+    expect(entry!.paths).toContain(`${FAKE_HOME}/.copilot/session-state`);
   });
 
-  it('includes codex pointing at ~/.codex/history', () => {
+  it('includes codex pointing at ~/.codex/sessions', () => {
     const entry = getEntries().find((e) => e.tool === 'codex');
-    expect(entry!.paths).toContain(`${FAKE_HOME}/.codex/history`);
+    expect(entry!.paths).toContain(`${FAKE_HOME}/.codex/sessions`);
   });
 
   it('returns exactly 4 entries', () => {
@@ -65,10 +63,8 @@ describe('getEntries — macOS', () => {
     );
   });
 
-  it('uses Library/Application Support path for copilot', () => {
+  it('uses ~/.copilot/session-state for copilot (same on all platforms)', () => {
     const entry = getEntries().find((e) => e.tool === 'copilot');
-    expect(entry!.paths).toContain(
-      `${FAKE_HOME}/Library/Application Support/Code/User/workspaceStorage`
-    );
+    expect(entry!.paths).toContain(`${FAKE_HOME}/.copilot/session-state`);
   });
 });

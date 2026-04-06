@@ -64,19 +64,22 @@ async function collectSessions(projectPath: string, limit: number): Promise<Sess
  * project as queryPath. Handles two cases:
  *
  *   1. Exact match: session.project === queryPath
- *   2. Claude encoded path: basename of session.project is "-Users-ilya-histd";
- *      the last '-'-separated segment ("histd") equals path.basename(queryPath)
+ *   2. Claude encoded path: Claude stores ~/.claude/projects/-Users-ilya-my-proj for
+ *      /Users/ilya/my-proj by replacing the leading / with - and every subsequent /
+ *      with -. We reverse that encoding and compare.
  */
 function matchesProject(sessionProject: string, queryPath: string): boolean {
   if (sessionProject === queryPath) return true;
 
   const sessionBase = path.basename(sessionProject);
-  const queryBase = path.basename(queryPath);
 
-  // Claude encodes /Users/ilya/histd as -Users-ilya-histd; last segment is the basename
+  // Claude encodes project paths by replacing every non-alphanumeric character
+  // with '-', e.g. /Users/ilya/histd → -Users-ilya-histd,
+  //                /tmp/foo.bar-baz  → -tmp-foo-bar-baz.
+  // Re-encode queryPath the same way and compare directly.
   if (sessionBase.startsWith('-')) {
-    const last = sessionBase.split('-').filter(Boolean).pop();
-    if (last === queryBase) return true;
+    const encoded = queryPath.replace(/[^a-zA-Z0-9]/g, '-');
+    if (sessionBase === encoded) return true;
   }
 
   return false;

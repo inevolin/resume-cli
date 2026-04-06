@@ -4,6 +4,7 @@ import { HistoryParser } from './parser/types.js';
 import { ClaudeParser } from './parser/claude.js';
 import { CursorParser } from './parser/cursor.js';
 import { CodexParser } from './parser/codex.js';
+import { CopilotParser } from './parser/copilot.js';
 
 export interface DiscoveryEntry {
   /** Internal kebab-case identifier (e.g. 'claude-code'). Distinct from Session.tool, which is the human-readable display name set by each parser (e.g. 'Claude Code'). */
@@ -41,12 +42,12 @@ export function getEntries(): DiscoveryEntry[] {
     },
     {
       tool: 'copilot',
-      paths: [appSupport('Code')],
-      parser: new CursorParser(),
+      paths: [path.join(home, '.copilot', 'session-state')],
+      parser: new CopilotParser(),
     },
     {
       tool: 'codex',
-      paths: [path.join(home, '.codex', 'history')],
+      paths: [path.join(home, '.codex', 'sessions')],
       parser: new CodexParser(),
     },
   ];

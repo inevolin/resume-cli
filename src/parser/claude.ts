@@ -53,8 +53,8 @@ export class ClaudeParser implements HistoryParser {
         continue;
       }
 
-      // Attempt to parse the earliest timestamp as the session time.
-      if (lineNum === 0 && rec.timestamp) {
+      // Use the first timestamp found in any record as the session time.
+      if (!sessionTime && rec.timestamp) {
         const t = new Date(rec.timestamp);
         if (!isNaN(t.getTime())) {
           sessionTime = t;
