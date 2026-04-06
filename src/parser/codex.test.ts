@@ -26,6 +26,10 @@ describe('CodexParser.canHandle', () => {
   it('rejects .json files not in .codex directory', () => {
     expect(parser.canHandle('/home/user/.other/history/abc.json')).toBe(false);
   });
+
+  it('rejects .json files in a directory that contains .codex as a substring', () => {
+    expect(parser.canHandle('/home/user/.codex_backup/history/abc.json')).toBe(false);
+  });
 });
 
 describe('CodexParser.parse', () => {

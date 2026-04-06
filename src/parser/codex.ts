@@ -18,7 +18,7 @@ interface RawMessage {
  */
 export class CodexParser implements HistoryParser {
   canHandle(filePath: string): boolean {
-    return filePath.includes('.codex') && filePath.endsWith('.json');
+    return filePath.includes(`${path.sep}.codex${path.sep}`) && filePath.endsWith('.json');
   }
 
   async parse(filePath: string): Promise<Session[]> {
@@ -55,7 +55,7 @@ function extractMessageArray(raw: unknown): unknown[] {
   if (Array.isArray(raw)) return raw;
   if (raw && typeof raw === 'object') {
     const obj = raw as Record<string, unknown>;
-    for (const key of ['messages', 'conversation', 'history']) {
+    for (const key of ['messages', 'conversation']) {
       if (Array.isArray(obj[key])) return obj[key] as unknown[];
     }
   }
