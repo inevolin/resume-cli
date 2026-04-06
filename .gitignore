@@ -1,0 +1,9 @@
+# Compiled binary
+histd
+
+# Go build cache / test artifacts
+*.test
+*.out
+
+# OS files
+.DS_Store
