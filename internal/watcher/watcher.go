@@ -101,14 +101,20 @@ func selectParser(path string) parser.HistoryParser {
 }
 
 // debouncer coalesces rapid events for the same path into a single action
-// that fires debounceDuration after the last event.
+// that fires debounceDuration after the last event.  A version counter ensures
+// that if a timer fires just as a new trigger arrives, the stale callback is
+// discarded and fn is called only once per quiet window.
 type debouncer struct {
 	mu      sync.Mutex
 	timers  map[string]*time.Timer
+	version map[string]int
 }
 
 func newDebouncer() *debouncer {
-	return &debouncer{timers: make(map[string]*time.Timer)}
+	return &debouncer{
+		timers:  make(map[string]*time.Timer),
+		version: make(map[string]int),
+	}
 }
 
 func (d *debouncer) trigger(key string, fn func()) {
@@ -117,9 +123,17 @@ func (d *debouncer) trigger(key string, fn func()) {
 	if t, ok := d.timers[key]; ok {
 		t.Stop()
 	}
+	d.version[key]++
+	v := d.version[key]
 	d.timers[key] = time.AfterFunc(debounceDuration, func() {
 		d.mu.Lock()
+		if d.version[key] != v {
+			// A newer trigger replaced us; skip this invocation.
+			d.mu.Unlock()
+			return
+		}
 		delete(d.timers, key)
+		delete(d.version, key)
 		d.mu.Unlock()
 		fn()
 	})

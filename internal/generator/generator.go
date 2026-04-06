@@ -85,12 +85,7 @@ func slugify(s string) string {
 			b.WriteRune('-')
 		}
 	}
-	// Collapse consecutive hyphens.
-	result := s
-	for strings.Contains(result, "--") {
-		result = strings.ReplaceAll(result, "--", "-")
-	}
-	// Redo with the cleaned slug from the builder.
+	// Collapse consecutive hyphens introduced by non-alphanumeric characters.
 	raw := b.String()
 	for strings.Contains(raw, "--") {
 		raw = strings.ReplaceAll(raw, "--", "-")
