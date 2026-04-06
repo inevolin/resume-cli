@@ -46,9 +46,9 @@ async function collectSessions(projectPath: string, limit: number): Promise<Sess
               all.push(s);
             }
           }
-        } catch {
+        } catch (err) {
           // Skip unreadable or unparseable files; log to stderr for debugging
-          process.stderr.write(`histd: skipping ${file}\n`);
+          process.stderr.write(`histd: skipping ${file}: ${err}\n`);
         }
       }
     }
@@ -61,21 +61,17 @@ async function collectSessions(projectPath: string, limit: number): Promise<Sess
 
 /**
  * Returns true when the session's recorded project path refers to the same
- * project as queryPath. Handles three cases:
+ * project as queryPath. Handles two cases:
  *
  *   1. Exact match: session.project === queryPath
- *   2. Suffix match: session.project ends with /queryPath (absolute sub-path)
- *   3. Claude encoded path: basename of session.project is "-Users-ilya-histd";
+ *   2. Claude encoded path: basename of session.project is "-Users-ilya-histd";
  *      the last '-'-separated segment ("histd") equals path.basename(queryPath)
  */
 function matchesProject(sessionProject: string, queryPath: string): boolean {
   if (sessionProject === queryPath) return true;
-  if (sessionProject.endsWith(path.sep + queryPath)) return true;
 
   const sessionBase = path.basename(sessionProject);
   const queryBase = path.basename(queryPath);
-
-  if (sessionBase === queryBase) return true;
 
   // Claude encodes /Users/ilya/histd as -Users-ilya-histd; last segment is the basename
   if (sessionBase.startsWith('-')) {
