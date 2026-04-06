@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { HistoryParser, Message, Session } from './types';
+import { HistoryParser, Message, Session } from './types.js';
 
 /** One line in a Claude Code JSONL history file. */
 interface ClaudeRecord {

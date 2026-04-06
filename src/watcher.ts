@@ -1,10 +1,9 @@
 import * as path from 'path';
-import chokidar from 'chokidar';
-import { Config } from './config';
-import { write } from './generator';
-import { HistoryParser } from './parser/types';
-import { ClaudeParser } from './parser/claude';
-import { CursorParser } from './parser/cursor';
+import { Config } from './config.js';
+import { write } from './generator.js';
+import { HistoryParser } from './parser/types.js';
+import { ClaudeParser } from './parser/claude.js';
+import { CursorParser } from './parser/cursor.js';
 
 const DEBOUNCE_MS = 2000;
 
@@ -15,37 +14,11 @@ const parsers: HistoryParser[] = [
 ];
 
 /**
- * Starts the file-watching loop. Returns a promise that rejects if the watcher
- * encounters a fatal error.
+ * Placeholder: file-watching is replaced by the MCP server architecture.
+ * This module will be deleted in a subsequent task.
  */
-export function run(cfg: Config): Promise<void> {
-  return new Promise((_, reject) => {
-    const paths = cfg.watch.map((e) => e.path);
-
-    const watcher = chokidar.watch(paths, {
-      persistent: true,
-      ignoreInitial: true,
-      followSymlinks: false,
-    });
-
-    const debounce = new Debouncer();
-
-    watcher.on('add', (filePath: string) => {
-      debounce.trigger(filePath, () => handleChange(filePath, cfg.output_dir));
-    });
-
-    watcher.on('change', (filePath: string) => {
-      debounce.trigger(filePath, () => handleChange(filePath, cfg.output_dir));
-    });
-
-    watcher.on('error', (err: unknown) => {
-      reject(err);
-    });
-
-    for (const entry of cfg.watch) {
-      console.log(`watcher: watching ${entry.path} (${entry.tool})`);
-    }
-  });
+export function run(_cfg: Config): Promise<void> {
+  return Promise.reject(new Error('watcher is no longer supported; use the MCP server'));
 }
 
 /** Runs the parser + generator pipeline for a changed file. */

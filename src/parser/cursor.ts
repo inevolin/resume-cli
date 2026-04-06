@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import Database from 'better-sqlite3';
-import { HistoryParser, Message, Session } from './types';
+import { HistoryParser, Message, Session } from './types.js';
 
 /** Shape of each tab entry stored in the Cursor DB. */
 interface CursorTab {

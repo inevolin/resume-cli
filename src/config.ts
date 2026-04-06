@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import * as TOML from 'smol-toml';
 
 /** A single path to watch with its associated tool name. */
 export interface WatchEntry {
@@ -48,10 +47,9 @@ export function defaultConfig(): Config {
   };
 }
 
-/** Serialises cfg as TOML and saves it to filePath. */
+/** Serialises cfg as JSON and saves it to filePath. */
 function writeConfig(filePath: string, cfg: Config): void {
-  const tomlStr = TOML.stringify(cfg as unknown as Record<string, TOML.TomlPrimitive>);
-  fs.writeFileSync(filePath, tomlStr, 'utf8');
+  fs.writeFileSync(filePath, JSON.stringify(cfg, null, 2), 'utf8');
 }
 
 /** Writes a default config file and returns the resulting Config. */
@@ -68,6 +66,6 @@ export function load(filePath: string): Config {
     return initDefault(filePath);
   }
   const raw = fs.readFileSync(filePath, 'utf8');
-  const parsed = TOML.parse(raw) as unknown as Config;
+  const parsed = JSON.parse(raw) as Config;
   return parsed;
 }

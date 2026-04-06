@@ -9,8 +9,8 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { defaultConfigDir, load } from './config';
-import { run } from './watcher';
+import { defaultConfigDir, load } from './config.js';
+import { run } from './watcher.js';
 
 function parseArgs(): string | null {
   const args = process.argv.slice(2);

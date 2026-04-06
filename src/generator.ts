@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { Session } from './parser/types';
+import { Session } from './parser/types.js';
 
 /**
  * Converts each session to a Markdown file and saves it under outputDir using:
