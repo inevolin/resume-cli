@@ -8,9 +8,8 @@
 
 <p align="center">
   <a href="https://github.com/inevolin/histd/actions/workflows/ci.yml"><img src="https://github.com/inevolin/histd/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://goreportcard.com/report/github.com/inevolin/histd"><img src="https://goreportcard.com/badge/github.com/inevolin/histd" alt="Go Report Card"></a>
+  <a href="https://www.npmjs.com/package/histd"><img src="https://img.shields.io/npm/v/histd.svg" alt="npm version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
-  <a href="https://pkg.go.dev/github.com/inevolin/histd"><img src="https://pkg.go.dev/badge/github.com/inevolin/histd.svg" alt="Go Reference"></a>
 </p>
 
 ---
@@ -31,15 +30,20 @@ AI coding tools store conversation history in proprietary, tool-specific formats
 - **Organised by date** — `YYYY-MM/YYYY-MM-DD_tool_project.md` layout
 - **Idempotent** — re-runs are safe; files are overwritten, never duplicated
 - **Zero-config start** — sensible defaults; just run `histd`
-- **No cgo** — pure-Go SQLite driver; compiles anywhere Go compiles
-- **Lightweight** — single binary, minimal dependencies
+- **Lightweight** — minimal dependencies, runs anywhere Node.js runs
 
 ## Quick Start
 
-### Install from source
+### Install globally
 
 ```bash
-go install github.com/inevolin/histd@latest
+npm install -g histd
+```
+
+### Or run without installing
+
+```bash
+npx histd
 ```
 
 ### Build from repository
@@ -47,7 +51,9 @@ go install github.com/inevolin/histd@latest
 ```bash
 git clone https://github.com/inevolin/histd.git
 cd histd
-go build -o histd .
+npm install
+npm run build
+node dist/index.js
 ```
 
 ### Run
@@ -118,16 +124,18 @@ Here's an approach using the repository pattern…
 ## Architecture
 
 ```
-histd
-├── main.go                        # Entry point, flag parsing, daemon start
-└── internal/
-    ├── config/config.go           # TOML config loading with auto-creation
-    ├── parser/
-    │   ├── parser.go              # HistoryParser interface + shared types
-    │   ├── claude.go              # Claude Code JSONL parser
-    │   └── cursor.go             # Cursor/Windsurf SQLite + JSON parser
-    ├── generator/generator.go     # Markdown renderer with YAML frontmatter
-    └── watcher/watcher.go         # fsnotify watcher with debouncing
+histd/
+├── src/
+│   ├── index.ts                   # Entry point, flag parsing, daemon start
+│   ├── config.ts                  # TOML config loading with auto-creation
+│   ├── parser/
+│   │   ├── types.ts               # HistoryParser interface + shared types
+│   │   ├── claude.ts              # Claude Code JSONL parser
+│   │   └── cursor.ts              # Cursor/Windsurf SQLite + JSON parser
+│   ├── generator.ts               # Markdown renderer with YAML frontmatter
+│   └── watcher.ts                 # chokidar watcher with debouncing
+├── package.json
+└── tsconfig.json
 ```
 
 **Pipeline:** File change detected → Parser extracts sessions → Generator writes Markdown
@@ -144,33 +152,33 @@ histd
 
 ### Prerequisites
 
-- Go 1.25 or later
+- Node.js 18 or later
 
 ### Build & Test
 
 ```bash
+# Install dependencies
+npm install
+
 # Build
-go build ./...
+npm run build
 
-# Run tests (with race detector)
-go test -v -race ./...
+# Run tests
+npm test
 
-# Lint
-go vet ./...
-
-# Check formatting
-gofmt -l .
+# Type-check (lint)
+npm run lint
 ```
 
 ### Project Structure
 
-| Package | Responsibility |
-|---------|---------------|
-| `main` | CLI entry point and daemon orchestration |
-| `internal/config` | Configuration loading, defaults, and persistence |
-| `internal/parser` | Tool-specific history file parsing |
-| `internal/generator` | Markdown file generation |
-| `internal/watcher` | File-system monitoring and event debouncing |
+| Module | Responsibility |
+|--------|---------------|
+| `src/index.ts` | CLI entry point and daemon orchestration |
+| `src/config.ts` | Configuration loading, defaults, and persistence |
+| `src/parser/` | Tool-specific history file parsing |
+| `src/generator.ts` | Markdown file generation |
+| `src/watcher.ts` | File-system monitoring and event debouncing |
 
 ## Contributing
 

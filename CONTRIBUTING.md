@@ -19,22 +19,22 @@ Thank you for your interest in contributing to histd! This document provides gui
 
 ### Prerequisites
 
-- Go 1.25 or later
+- Node.js 18 or later
 
 ### Build & Test
 
 ```bash
+# Install dependencies
+npm install
+
 # Build
-go build ./...
+npm run build
 
-# Run all tests with race detection
-go test -v -race ./...
+# Run all tests
+npm test
 
-# Lint
-go vet ./...
-
-# Check formatting
-gofmt -l .
+# Type-check (lint)
+npm run lint
 ```
 
 All of these checks run in CI on every push and pull request.
@@ -43,9 +43,8 @@ All of these checks run in CI on every push and pull request.
 
 ### Code Style
 
-- Follow standard Go conventions and [Effective Go](https://go.dev/doc/effective_go) guidelines
-- Run `gofmt` before committing — CI will reject unformatted code
-- Run `go vet` to catch common mistakes
+- Follow standard TypeScript conventions
+- Run `npm run lint` before committing — CI will reject type errors
 - Add or update tests for any changed functionality
 
 ### Commit Messages
@@ -58,16 +57,18 @@ All of these checks run in CI on every push and pull request.
 
 histd is designed to be extended with parsers for additional AI tools. To add support for a new tool:
 
-1. Create a new file in `internal/parser/` (e.g. `newtool.go`)
+1. Create a new file in `src/parser/` (e.g. `newtool.ts`)
 2. Implement the `HistoryParser` interface:
-   ```go
-   type HistoryParser interface {
-       CanHandle(path string) bool
-       Parse(path string) ([]Session, error)
+   ```typescript
+   import { HistoryParser, Session } from './types';
+
+   export class NewToolParser implements HistoryParser {
+     canHandle(filePath: string): boolean { ... }
+     async parse(filePath: string): Promise<Session[]> { ... }
    }
    ```
-3. Register your parser in `internal/watcher/watcher.go`
-4. Add corresponding tests in `internal/parser/parser_test.go`
+3. Register your parser in `src/watcher.ts`
+4. Add corresponding tests in `src/parser/newtool.test.ts`
 5. Update the README's "Supported Tools" table
 
 ## Submitting Changes
@@ -75,14 +76,14 @@ histd is designed to be extended with parsers for additional AI tools. To add su
 1. **Push** your branch to your fork
 2. **Open a pull request** against the `main` branch
 3. **Describe** your changes clearly in the PR description
-4. Ensure **CI passes** — the pipeline runs build, tests, vet, and formatting checks
+4. Ensure **CI passes** — the pipeline runs build, tests, and type-checking
 
 ## Reporting Issues
 
 - Use the [GitHub issue tracker](https://github.com/inevolin/histd/issues)
 - Check existing issues before creating a new one
 - Include reproduction steps, expected behaviour, and actual behaviour
-- For bugs, include your OS and Go version
+- For bugs, include your OS and Node.js version
 
 ## License
 
