@@ -14,6 +14,26 @@
 
 ---
 
+## Quick Start
+
+**1. Add histd to your AI tool's MCP config** (no install needed, `npx` runs it on demand):
+
+```json
+{ "mcpServers": { "histd": { "command": "npx", "args": ["histd"] } } }
+```
+
+See [MCP Setup](#mcp-setup) below for the exact file location for each tool.
+
+**2. Install the `/histd` slash command:**
+
+```bash
+npx skills add inevolin/histd
+```
+
+That's it. Type `/histd` in Claude Code, Codex, or Copilot CLI to restore context from your last sessions.
+
+---
+
 ## Why histd?
 
 AI coding tools store conversation history in proprietary, tool-specific formats — JSONL, SQLite, JSON — scattered across your home directory. When you switch tools, your context is lost.
