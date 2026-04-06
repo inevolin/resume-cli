@@ -1,9 +1,6 @@
-# Compiled binary
-histd
-
-# Go build cache / test artifacts
-*.test
-*.out
+# Node.js dependencies and build artifacts
+node_modules/
+dist/
 
 # OS files
 .DS_Store

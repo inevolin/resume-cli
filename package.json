@@ -1,0 +1,48 @@
+{
+  "name": "histd",
+  "version": "1.0.0",
+  "description": "MCP server that lets AI agents query your cross-tool coding session history (Claude Code, Cursor, Copilot, Codex).",
+  "main": "dist/index.js",
+  "bin": {
+    "histd": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inevolin/histd.git"
+  },
+  "keywords": [
+    "ai",
+    "claude",
+    "cursor",
+    "copilot",
+    "codex",
+    "mcp",
+    "history",
+    "context"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/inevolin/histd/issues"
+  },
+  "homepage": "https://github.com/inevolin/histd#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "better-sqlite3": "^11.10.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.15.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.3.2",
+    "typescript": "^5.8.3"
+  }
+}

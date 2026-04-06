@@ -16,17 +16,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          go-version-file: go.mod
-          cache: true
+          node-version: '20'
+          cache: 'npm'
 
-      - name: Download modules
-        run: go mod download
+      - name: Install dependencies
+        run: npm ci
 
       - name: Build
-        run: go build ./...
+        run: npm run build
 
   test:
     name: Unit Tests
@@ -34,41 +34,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          go-version-file: go.mod
-          cache: true
+          node-version: '20'
+          cache: 'npm'
 
-      - name: Download modules
-        run: go mod download
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run tests
-        run: go test -v -race -count=1 ./...
+        run: npm test
 
-  vet:
-    name: Vet & Lint
+  lint:
+    name: Type-check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          go-version-file: go.mod
-          cache: true
+          node-version: '20'
+          cache: 'npm'
 
-      - name: Download modules
-        run: go mod download
+      - name: Install dependencies
+        run: npm ci
 
-      - name: go vet
-        run: go vet ./...
-
-      - name: Check formatting
-        run: |
-          unformatted=$(gofmt -l .)
-          if [ -n "$unformatted" ]; then
-            echo "The following files are not gofmt'd:"
-            echo "$unformatted"
-            exit 1
-          fi
+      - name: Type-check
+        run: npm run lint
