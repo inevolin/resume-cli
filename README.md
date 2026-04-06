@@ -28,20 +28,43 @@ No background process. No config file. Just add it to your MCP config once.
 |------|--------|--------------------|
 | Claude Code | JSONL | `~/.claude/projects/` |
 | Cursor | SQLite (`.vscdb`) | `~/.config/Cursor/User/workspaceStorage/` |
-| GitHub Copilot (VS Code) | SQLite (`.vscdb`) | `~/.config/Code/User/workspaceStorage/` |
-| OpenAI Codex CLI | JSON | `~/.codex/history/` |
+| GitHub Copilot CLI | JSONL | `~/.copilot/session-state/` |
+| OpenAI Codex CLI | JSONL | `~/.codex/sessions/` |
 
-macOS paths (`~/Library/Application Support/...`) are also detected automatically.
+macOS paths (`~/Library/Application Support/...`) are detected automatically for Cursor.
 
-## Setup
+## MCP Setup
 
-Add histd to your MCP config. No installation required — `npx` fetches it on demand.
+Add histd to each tool's MCP config. No installation required — `npx` fetches it on demand.
 
-**Claude Desktop** (`~/.claude/claude_desktop_config.json`):
+**Claude Code** (`~/.claude.json` → `mcpServers`):
+```json
+{
+  "mcpServers": {
+    "histd-local": {
+      "command": "npx",
+      "args": ["histd"]
+    }
+  }
+}
+```
+
+**Codex CLI** (`~/.codex/config.toml`):
+```toml
+[mcp_servers.histd]
+command = "npx"
+args = ["histd"]
+
+[mcp_servers.histd.tools.get_recent_context]
+approval_mode = "auto"
+```
+
+**GitHub Copilot CLI** (`~/.copilot/mcp-config.json`):
 ```json
 {
   "mcpServers": {
     "histd": {
+      "type": "stdio",
       "command": "npx",
       "args": ["histd"]
     }
@@ -61,7 +84,15 @@ Add histd to your MCP config. No installation required — `npx` fetches it on d
 }
 ```
 
-Restart your AI tool after updating the config.
+## Slash Command
+
+Install the `/histd` slash command for one-step context restore in any supported AI CLI:
+
+```bash
+npx skills add inevolin/histd
+```
+
+Then type `/histd` in Claude Code, Codex, or Copilot CLI to get a one-line-per-session summary of recent work across all tools.
 
 ## Usage
 
@@ -71,18 +102,18 @@ Once configured, your AI agent can call:
 get_recent_context(project_path: "/Users/you/my-project", limit: 5)
 ```
 
-Or just ask it naturally:
+Or ask it naturally:
 
 > "Check my recent history for this project before we start."
 
-The agent will call `get_recent_context` with the current working directory and receive the last N conversation turns across all supported tools.
+The agent will call `get_recent_context` with the current working directory and receive the last N sessions across all supported tools, newest first.
 
 ## Tool Reference
 
 ### `get_recent_context`
 
 | Parameter | Type | Required | Description |
-|---|---|---|---|
+|-----------|------|----------|-------------|
 | `project_path` | string | yes | Absolute path to the project directory |
 | `limit` | number | no | Max sessions to return (default: 5, max: 50) |
 
@@ -93,7 +124,7 @@ The agent will call `get_recent_context` with the current working directory and 
 User: How do I refactor the database layer?
 Assistant: Here's an approach using the repository pattern…
 
-[2] Cursor — 2026-04-05T09:15:00Z — /Users/you/my-project
+[2] Codex — 2026-04-05T09:15:00Z — /Users/you/my-project
 …
 ```
 
@@ -106,22 +137,27 @@ src/
 └── parser/
     ├── types.ts      — HistoryParser interface + Session/Message types
     ├── claude.ts     — Claude Code JSONL parser
-    ├── cursor.ts     — Cursor / Copilot SQLite parser
-    └── codex.ts      — OpenAI Codex CLI JSON parser
+    ├── cursor.ts     — Cursor SQLite parser
+    ├── copilot.ts    — GitHub Copilot CLI JSONL parser
+    └── codex.ts      — OpenAI Codex CLI JSONL parser
 ```
 
 ## Development
 
 ```bash
 npm install
-npm run build   # compile TypeScript
-npm test        # run tests
-npm run lint    # type-check only
+npm run build        # compile TypeScript
+npm test             # run unit tests
 ```
 
-## Contributing
+### Integration tests
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+End-to-end tests that create real sessions in each CLI and verify cross-tool detection:
+
+```bash
+bash integration/test.sh               # full suite (requires claude, codex, gh)
+bash integration/test.sh --only-parse  # fast parse-only check, no LLM round-trips
+```
 
 ## License
 
