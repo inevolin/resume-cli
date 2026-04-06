@@ -19,7 +19,7 @@
 **1. Add histd to your AI tool's MCP config** (no install needed, `npx` runs it on demand):
 
 ```json
-{ "mcpServers": { "histd": { "command": "npx", "args": ["histd"] } } }
+{ "mcpServers": { "histd": { "command": "npx", "args": ["github:inevolin/histd"] } } }
 ```
 
 See [MCP Setup](#mcp-setup) below for the exact file location for each tool.
@@ -63,7 +63,7 @@ Add histd to each tool's MCP config. No installation required — `npx` fetches 
   "mcpServers": {
     "histd-local": {
       "command": "npx",
-      "args": ["histd"]
+      "args": ["github:inevolin/histd"]
     }
   }
 }
@@ -86,7 +86,7 @@ approval_mode = "auto"
     "histd": {
       "type": "stdio",
       "command": "npx",
-      "args": ["histd"]
+      "args": ["github:inevolin/histd"]
     }
   }
 }
@@ -98,7 +98,7 @@ approval_mode = "auto"
   "mcpServers": {
     "histd": {
       "command": "npx",
-      "args": ["histd"]
+      "args": ["github:inevolin/histd"]
     }
   }
 }
