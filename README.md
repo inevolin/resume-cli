@@ -1,8 +1,8 @@
 <p align="center">
   <h1 align="center">histd</h1>
   <p align="center">
-    A lightweight daemon that syncs your AI coding sessions into searchable Markdown files.<br/>
-    Switch between Claude Code, Cursor, and Copilot without losing context.
+    An MCP server that lets AI agents query your cross-tool coding session history.<br/>
+    Switch between Claude Code, Cursor, Copilot, and Codex without losing context.
   </p>
 </p>
 
@@ -16,174 +16,113 @@
 
 ## Why histd?
 
-Hit your Claude usage limits? Need to switch to Cursor or Copilot mid-session?
+AI coding tools store conversation history in proprietary, tool-specific formats — JSONL, SQLite, JSON — scattered across your home directory. When you switch tools, your context is lost.
 
-AI coding tools store conversation history in proprietary, tool-specific formats — JSONL, SQLite, JSON blobs — scattered across your home directory. When you switch tools, your context is lost.
+**histd** is an MCP server. When you start a session in a new AI tool, it can call `get_recent_context` to retrieve your recent conversations for the current project — regardless of which tool they came from.
 
-**histd** runs in the background and continuously converts these proprietary histories into clean, organised Markdown files. Your conversations become portable, searchable, and version-controllable — letting you (or your next AI agent) pick up exactly where you left off.
+No background process. No config file. Just add it to your MCP config once.
 
-## Features
+## Supported Tools
 
-- **Multi-tool support** — Claude Code, Cursor, and Windsurf out of the box
-- **Real-time sync** — file-system watcher detects changes instantly
-- **Clean Markdown output** — YAML frontmatter + readable conversation turns
-- **Organised by date** — `YYYY-MM/YYYY-MM-DD_tool_project.md` layout
-- **Idempotent** — re-runs are safe; files are overwritten, never duplicated
-- **Zero-config start** — sensible defaults; just run `histd`
-- **Lightweight** — minimal dependencies, runs anywhere Node.js runs
+| Tool | Format | Auto-detected path |
+|------|--------|--------------------|
+| Claude Code | JSONL | `~/.claude/projects/` |
+| Cursor | SQLite (`.vscdb`) | `~/.config/Cursor/User/workspaceStorage/` |
+| GitHub Copilot (VS Code) | SQLite (`.vscdb`) | `~/.config/Code/User/workspaceStorage/` |
+| OpenAI Codex CLI | JSON | `~/.codex/history/` |
 
-## Quick Start
+macOS paths (`~/Library/Application Support/...`) are also detected automatically.
 
-### Install globally
+## Setup
 
-```bash
-npm install -g histd
+Add histd to your MCP config. No installation required — `npx` fetches it on demand.
+
+**Claude Desktop** (`~/.claude/claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "histd": {
+      "command": "npx",
+      "args": ["histd"]
+    }
+  }
+}
 ```
 
-### Or run without installing
-
-```bash
-npx histd
+**Cursor** (`~/.cursor/mcp.json`):
+```json
+{
+  "mcpServers": {
+    "histd": {
+      "command": "npx",
+      "args": ["histd"]
+    }
+  }
+}
 ```
 
-### Build from repository
+Restart your AI tool after updating the config.
 
-```bash
-git clone https://github.com/inevolin/histd.git
-cd histd
-npm install
-npm run build
-node dist/index.js
-```
+## Usage
 
-### Run
-
-```bash
-# Start with default config (~/.histd/config.toml, auto-created on first run)
-histd
-
-# Or specify a custom config path
-histd --config /path/to/config.toml
-```
-
-histd will watch the default AI tool directories and write Markdown files to `~/.histd/sessions/`.
-
-## Configuration
-
-On first run, histd creates `~/.histd/config.toml` with sensible defaults:
-
-```toml
-output_dir = "/home/you/.histd/sessions"
-
-[[watch]]
-path = "/home/you/.claude/projects"
-tool = "claude-code"
-
-[[watch]]
-path = "/home/you/.config/Cursor/User/workspaceStorage"
-tool = "cursor"
-```
-
-| Key | Description |
-|-----|-------------|
-| `output_dir` | Directory where Markdown session files are written |
-| `[[watch]].path` | Directory to monitor for AI tool history files |
-| `[[watch]].tool` | Tool identifier (`claude-code`, `cursor`, etc.) |
-
-You can add additional `[[watch]]` entries for other tools or custom paths.
-
-## Output Format
-
-Sessions are written as Markdown with YAML frontmatter:
+Once configured, your AI agent can call:
 
 ```
-~/.histd/sessions/
-└── 2026-04/
-    ├── 2026-04-05_claude-code_my-project.md
-    └── 2026-04-06_cursor_my-project.md
+get_recent_context(project_path: "/Users/you/my-project", limit: 5)
 ```
 
-Each file looks like:
+Or just ask it naturally:
 
-```markdown
----
-tool: "Claude Code"
-project: "/home/you/projects/my-project"
-timestamp: "2026-04-05T14:30:00Z"
----
+> "Check my recent history for this project before we start."
 
-## User
+The agent will call `get_recent_context` with the current working directory and receive the last N conversation turns across all supported tools.
 
-How do I refactor the database layer?
+## Tool Reference
 
-## Assistant
+### `get_recent_context`
 
-Here's an approach using the repository pattern…
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `project_path` | string | yes | Absolute path to the project directory |
+| `limit` | number | no | Max sessions to return (default: 5, max: 50) |
+
+**Returns:** Formatted text listing recent sessions, newest first:
+
+```
+[1] Claude Code — 2026-04-06T14:30:00Z — /Users/you/my-project
+User: How do I refactor the database layer?
+Assistant: Here's an approach using the repository pattern…
+
+[2] Cursor — 2026-04-05T09:15:00Z — /Users/you/my-project
+…
 ```
 
 ## Architecture
 
 ```
-histd/
-├── src/
-│   ├── index.ts                   # Entry point, flag parsing, daemon start
-│   ├── config.ts                  # TOML config loading with auto-creation
-│   ├── parser/
-│   │   ├── types.ts               # HistoryParser interface + shared types
-│   │   ├── claude.ts              # Claude Code JSONL parser
-│   │   └── cursor.ts              # Cursor/Windsurf SQLite + JSON parser
-│   ├── generator.ts               # Markdown renderer with YAML frontmatter
-│   └── watcher.ts                 # chokidar watcher with debouncing
-├── package.json
-└── tsconfig.json
+src/
+├── index.ts          — MCP server entry point; registers get_recent_context
+├── discovery.ts      — Maps each tool to its default FS paths + parser
+└── parser/
+    ├── types.ts      — HistoryParser interface + Session/Message types
+    ├── claude.ts     — Claude Code JSONL parser
+    ├── cursor.ts     — Cursor / Copilot SQLite parser
+    └── codex.ts      — OpenAI Codex CLI JSON parser
 ```
-
-**Pipeline:** File change detected → Parser extracts sessions → Generator writes Markdown
-
-## Supported Tools
-
-| Tool | Format | Default Path |
-|------|--------|--------------|
-| Claude Code | JSONL | `~/.claude/projects/` |
-| Cursor | SQLite (`.vscdb`) + JSON | `~/.config/Cursor/User/workspaceStorage/` |
-| Windsurf | SQLite (`.vscdb`) + JSON | Shared with Cursor parser |
 
 ## Development
 
-### Prerequisites
-
-- Node.js 18 or later
-
-### Build & Test
-
 ```bash
-# Install dependencies
 npm install
-
-# Build
-npm run build
-
-# Run tests
-npm test
-
-# Type-check (lint)
-npm run lint
+npm run build   # compile TypeScript
+npm test        # run tests
+npm run lint    # type-check only
 ```
-
-### Project Structure
-
-| Module | Responsibility |
-|--------|---------------|
-| `src/index.ts` | CLI entry point and daemon orchestration |
-| `src/config.ts` | Configuration loading, defaults, and persistence |
-| `src/parser/` | Tool-specific history file parsing |
-| `src/generator.ts` | Markdown file generation |
-| `src/watcher.ts` | File-system monitoring and event debouncing |
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE).
