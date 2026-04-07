@@ -24,6 +24,16 @@ That's it. No global install needed — and you'll always get the latest version
 resume
 ```
 
+## How to update
+
+If you set up the alias above, updates are automatic — `npx` will pick up the latest version on each run.
+
+To force an immediate update to the latest release:
+
+```bash
+npx ai-resume-cli@latest
+```
+
 ## Controls
 
 | Key | Action |
