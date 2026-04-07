@@ -1,37 +1,59 @@
 ---
 name: histd
-description: Restore context from recent AI coding sessions for this project. Call this when switching between AI tools (Claude Code, Codex, Copilot, Cursor) to see what was worked on recently.
+description: Interactive session picker — shows recent AI coding sessions for this project across all tools (Claude Code, Codex, Copilot, Cursor) and lets the user select one to continue from.
 ---
 
-# histd — session context restore
+# histd — session picker
 
-## What this skill does
+**Announce at start:** "I'm using histd to fetch your recent session history."
 
-Calls the `histd` MCP tool to retrieve recent AI coding session history for the current project, then presents a concise summary so you can continue work seamlessly after switching tools.
+## Step 1 — Fetch sessions
 
-## Instructions
+Call the `get_recent_context` MCP tool:
+- **Claude Code:** server is `histd-local` → call `histd-local: get_recent_context`
+- **Codex / Copilot:** server is `histd` → call `histd: get_recent_context`
+- Pass `project_path` = current working directory
+- Pass `limit` = 10
 
-1. Determine the current project path (the working directory of this session).
+Save the full raw output — you will need it in Step 3.
 
-2. Call the `get_recent_context` MCP tool:
-   - In **Claude Code**: the server is named `histd-local` — call `histd-local: get_recent_context`
-   - In **Codex** or **Copilot**: the server is named `histd` — call `histd: get_recent_context`
-   - Pass `project_path` as the absolute path to the current working directory.
-   - Use the default limit (5 sessions).
+## Step 2 — Present the picker
 
-3. For each session returned, output one line:
-   `<tool> — <date> — <one-sentence summary of what was worked on>`
+If no sessions were found:
+```
+No session history found for this project.
+Make sure histd is configured as an MCP server in your tool's config.
+```
+Stop.
 
-4. After the list, add a short paragraph (2–4 sentences) highlighting any decisions made, open questions, or next steps visible across the sessions.
-
-5. If no sessions are found, say so clearly and suggest the user check that histd is configured as an MCP server.
-
-## Example output
+Otherwise, display a numbered list. For each session show one line:
 
 ```
-Claude Code — 2026-04-06 — Rewrote CodexParser to target ~/.codex/sessions and fixed matchesProject encoding bug.
-Codex       — 2026-04-05 — Reviewed MCP architecture, decided to drop the background daemon in favour of a pure MCP server.
-Copilot     — 2026-04-04 — Added integration tests covering all 6 cross-CLI directions.
-
-The main theme is stabilising the histd parsers after the MCP rewrite. The matchesProject fix for paths containing dots/dashes is recent and worth keeping in mind. No open blockers were noted.
+[N] <Tool> — <date> — <one-sentence summary of what was worked on>
 ```
+
+Then ask:
+
+```
+Which session would you like to continue with? (enter a number, or 0 to skip)
+```
+
+Wait for the user's response before proceeding.
+
+## Step 3 — Load the selected session
+
+**If the user enters 0 or skips:** stop, no further action.
+
+**Otherwise:** from the raw output saved in Step 1, extract the full content of the chosen session (all User/Assistant turns) and display it in full so the context is visible.
+
+Then say:
+
+```
+Ready. Continuing from the [Tool] session on [date].
+```
+
+## Guidelines
+
+- Keep the summaries in Step 2 tight — one sentence, focus on *what* was being worked on, not tool names or timestamps (those are already shown).
+- Do not truncate or paraphrase the session content in Step 3 — show it verbatim so nothing is lost.
+- If the user picks a number out of range, ask again.
