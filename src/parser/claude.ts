@@ -87,7 +87,7 @@ export class ClaudeParser implements HistoryParser {
       : path.dirname(filePath);
     const sessionId = path.basename(filePath, '.jsonl');
 
-    return [{ tool: 'Claude Code', project, timestamp, messages, sessionId }];
+    return [{ tool: 'Claude Code', project, timestamp, messages, sessionId, filePath }];
   }
 }
 

@@ -9,7 +9,20 @@ interface SessionListProps {
 }
 
 function formatDate(d: Date): string {
-  return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+  const date = d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+  const time = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  return `${date} ${time}`;
+}
+
+function timeAgo(d: Date): string {
+  const seconds = Math.floor((Date.now() - d.getTime()) / 1000);
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
 }
 
 function summarize(session: Session): string {
@@ -31,6 +44,7 @@ export function SessionList({ sessions, cursor, visibleRows }: SessionListProps)
         const arrow = selected ? '▶' : ' ';
         const toolLabel = session.tool.padEnd(12);
         const dateLabel = formatDate(session.timestamp);
+        const agoLabel = timeAgo(session.timestamp);
         const summary = summarize(session);
 
         return (
@@ -38,6 +52,7 @@ export function SessionList({ sessions, cursor, visibleRows }: SessionListProps)
             <Text color={selected ? 'greenBright' : undefined}>{arrow}{' '}</Text>
             <Text bold={selected} color={selected ? 'blueBright' : 'gray'}>{toolLabel}</Text>
             <Text color="gray">{'  '}{dateLabel}{'  '}</Text>
+            <Text color={selected ? 'yellow' : 'gray'}>{agoLabel.padEnd(8)}{'  '}</Text>
             <Text color={selected ? 'white' : 'gray'}>{summary}</Text>
           </Box>
         );

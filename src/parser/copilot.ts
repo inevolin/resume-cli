@@ -76,7 +76,7 @@ export class CopilotParser implements HistoryParser {
     const timestamp = sessionTime ?? new Date();
     const project = projectCwd ?? path.dirname(filePath);
 
-    return [{ tool: 'Copilot', project, timestamp, messages, sessionId: path.basename(path.dirname(filePath)) }];
+    return [{ tool: 'Copilot', project, timestamp, messages, sessionId: path.basename(path.dirname(filePath)), filePath }];
   }
 }
 

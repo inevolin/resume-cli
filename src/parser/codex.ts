@@ -88,7 +88,7 @@ export class CodexParser implements HistoryParser {
     const timestamp = sessionTime ?? fileTimestamp(filePath);
     const project = projectCwd ?? path.dirname(filePath);
 
-    return [{ tool: 'Codex', project, timestamp, messages, sessionId: sessionId ?? undefined }];
+    return [{ tool: 'Codex', project, timestamp, messages, sessionId: sessionId ?? undefined, filePath }];
   }
 }
 

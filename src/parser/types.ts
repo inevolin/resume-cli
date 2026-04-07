@@ -11,6 +11,7 @@ export interface Session {
   timestamp: Date;   // best-effort timestamp for the session
   messages: Message[];
   sessionId?: string; // native UUID used for --resume (if available)
+  filePath?: string;  // absolute path to the source history file
 }
 
 /** Implemented by every tool-specific parser. */

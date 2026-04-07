@@ -1,8 +1,16 @@
 # resume-cli
 
-Interactive TUI session picker for AI coding tools. Lists your recent sessions from Claude Code, Codex, and Copilot in one place — pick one and continue it in any tool.
+Interactive TUI for picking up where you left off across AI coding tools. Lists your recent sessions from Claude Code, Codex, and Copilot in one place — select one, choose a tool, and continue.
 
-## Quick Start
+```
+▶ Claude Code    Apr 07 14:32  2h ago    refactor the auth middleware
+  Copilot        Apr 07 11:05  5h ago    add pagination to the API
+  Codex          Apr 06 09:14  1d ago    fix the flaky test in parser
+
+Continue in: ◀ Claude Code ▶   ↑↓ navigate · tab: switch tool · ↵ launch · q quit
+```
+
+## Quick start
 
 ```bash
 npx ai-resume-cli
@@ -16,29 +24,45 @@ No install required. Requires Node.js 18+.
 npm install -g ai-resume-cli
 ```
 
-**Optional shell alias** (use any name you like):
+**Optional shell alias:**
 
 ```bash
-echo "alias resume='npx ai-resume-cli'" >> ~/.zshrc
-source ~/.zshrc
-```
-
-## Usage
-
-```
+echo "alias resume='npx ai-resume-cli'" >> ~/.zshrc && source ~/.zshrc
 resume
 ```
 
-- **↑ / ↓** — navigate sessions
-- **Tab** — cycle target tool (Claude Code → Codex → Copilot)
-- **Enter** — launch selected session in the chosen tool
-- **q** — quit
+## Controls
 
-Only tools that are installed on your machine appear in the tool cycle list.
+| Key | Action |
+|-----|--------|
+| ↑ / ↓ | Navigate sessions |
+| Tab | Cycle target tool |
+| Enter | Launch selected session |
+| q / Esc | Quit |
+
+Only tools installed on your machine appear in the tool cycle.
+
+## How it works
+
+Sessions are read directly from each tool's local storage:
+
+| Tool | Session directory |
+|------|------------------|
+| Claude Code | `~/.claude/projects/` |
+| Codex | `~/.codex/sessions/` |
+| Copilot | `~/.copilot/session-state/` |
+
+**Same-tool resume** uses the tool's native `--resume <uuid>` flag — no data is copied or converted.
+
+**Cross-tool resume** starts the target tool with an initial message pointing to the original session file. The AI reads it and continues from where you left off, with full conversation history as context.
+
+## Requirements
+
+- Node.js 18+
+- macOS or Linux
+- At least one of: [Claude Code](https://claude.ai/code), [Codex](https://github.com/openai/codex), [Copilot CLI](https://docs.github.com/copilot/how-tos/copilot-cli)
 
 ## Local development
-
-To run from a local clone (e.g. to test a branch before merging):
 
 ```bash
 git clone https://github.com/inevolin/resume-cli
@@ -48,32 +72,23 @@ npm run build
 node dist/cli.js
 ```
 
-Or link it globally so you can type `resume` anywhere:
+To use it globally from the local clone:
 
 ```bash
-npm link            # run once inside the repo
-resume              # works in any directory
-npm unlink -g resume-cli  # remove when done
+npm link
+resume        # works in any directory
+npm unlink -g ai-resume-cli  # remove when done
 ```
 
-## How it works
+Run tests:
 
-Sessions are read from each tool's local storage directory:
+```bash
+npm test
+```
 
-| Tool | Session directory |
-|------|------------------|
-| Claude Code | `~/.claude/projects/` |
-| Codex | `~/.codex/sessions/` |
-| Copilot | `~/.copilot/session-state/` |
+## Contributing
 
-**Same-tool resume:** uses the tool's native `--resume <uuid>` flag — no data is copied.
-
-**Cross-tool resume:** writes the source session's messages into the target tool's session format under a new UUID, then resumes with that UUID. The imported session appears in the target tool's own history.
-
-## Requirements
-
-- Node.js 18+
-- macOS or Linux
+Bug reports and pull requests welcome at [inevolin/resume-cli](https://github.com/inevolin/resume-cli).
 
 ## License
 
