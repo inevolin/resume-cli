@@ -2,8 +2,6 @@
 
 Interactive TUI session picker for AI coding tools. Lists your recent sessions from Claude Code, Codex, and Copilot in one place — pick one and continue it in any tool.
 
-![demo](assets/demo.gif)
-
 ## Quick Start
 
 ```bash
