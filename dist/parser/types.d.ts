@@ -9,6 +9,7 @@ export interface Session {
     project: string;
     timestamp: Date;
     messages: Message[];
+    sessionId?: string;
 }
 /** Implemented by every tool-specific parser. */
 export interface HistoryParser {

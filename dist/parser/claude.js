@@ -1,46 +1,10 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ClaudeParser = void 0;
-const fs = __importStar(require("fs"));
-const path = __importStar(require("path"));
+import * as fs from 'fs';
+import * as path from 'path';
 /**
  * Parses Claude Code session files stored under
  * ~/.claude/projects/<project-hash>/<uuid>.jsonl
  */
-class ClaudeParser {
+export class ClaudeParser {
     /**
      * Returns true for any .jsonl file inside a directory that looks like
      * a Claude project storage path.
@@ -89,13 +53,18 @@ class ClaudeParser {
             messages.push({ role, content });
         }
         const timestamp = sessionTime ?? new Date();
-        // Derive project path from the immediate parent directory (the encoded project dir).
-        // Layout: ~/.claude/projects/<encoded-project-path>/<uuid>.jsonl
-        const project = path.dirname(filePath);
-        return [{ tool: 'Claude Code', project, timestamp, messages }];
+        // Attempt to decode the Claude-encoded project path back to a real filesystem path.
+        // Claude encodes project paths by replacing all non-alphanumeric chars with '-',
+        // so "/Users/ilya/histd" becomes "-Users-ilya-histd". The decode is lossy (dots also
+        // become '-'), but works correctly for typical paths without dots in directory names.
+        const encodedName = path.basename(path.dirname(filePath));
+        const project = encodedName.startsWith('-')
+            ? '/' + encodedName.slice(1).replace(/-/g, '/')
+            : path.dirname(filePath);
+        const sessionId = path.basename(filePath, '.jsonl');
+        return [{ tool: 'Claude Code', project, timestamp, messages, sessionId }];
     }
 }
-exports.ClaudeParser = ClaudeParser;
 /**
  * Normalises the polymorphic content field (string or array of content blocks)
  * to a plain string.

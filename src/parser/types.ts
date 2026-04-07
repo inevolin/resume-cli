@@ -10,6 +10,7 @@ export interface Session {
   project: string;   // absolute path to the project directory
   timestamp: Date;   // best-effort timestamp for the session
   messages: Message[];
+  sessionId?: string; // native UUID used for --resume (if available)
 }
 
 /** Implemented by every tool-specific parser. */
