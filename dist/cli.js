@@ -37,7 +37,7 @@ async function main() {
         detectInstalledTools(),
     ]);
     if (installedTools.length === 0) {
-        process.stderr.write('histd: no supported AI tools detected (claude, codex, gh copilot)\n');
+        process.stderr.write('resume-cli: no supported AI tools detected (claude, codex, gh copilot)\n');
         process.exit(1);
     }
     let launched = false;
@@ -46,7 +46,8 @@ async function main() {
         installedTools,
         onLaunch: (session, tool) => {
             launched = true;
-            launch(session, tool);
+            const resumeId = launch(session, tool);
+            process.stderr.write(`resume-cli: launching ${tool} --resume ${resumeId}\n`);
         },
     }));
     await waitUntilExit();

@@ -177,7 +177,7 @@ export function writeSyntheticCopilot(session: Session, targetDir: string): stri
 
 // ─── Launcher ────────────────────────────────────────────────────────────────
 
-export function launch(session: Session, targetTool: string): void {
+export function launch(session: Session, targetTool: string): string {
   const home = os.homedir();
   const isSameTool = normalizeTool(session.tool) === normalizeTool(targetTool);
   let resumeId: string;
@@ -192,6 +192,7 @@ export function launch(session: Session, targetTool: string): void {
 
   const [cmd, args] = buildCommand(targetTool, resumeId);
   childProcess.spawn(cmd, args, { stdio: 'inherit', detached: false });
+  return resumeId;
 }
 
 function normalizeTool(tool: string): string {
