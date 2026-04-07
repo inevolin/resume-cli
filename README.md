@@ -15,10 +15,10 @@ Continue in: ◀ Claude Code ▶   ↑↓ navigate · tab: switch tool · ↵ la
 Add this alias to your shell — then just type `resume` from anywhere:
 
 ```bash
-echo "alias resume='npx ai-resume-cli'" >> ~/.zshrc && source ~/.zshrc
+echo "alias resume='npx ai-resume-cli@latest'" >> ~/.zshrc && source ~/.zshrc
 ```
 
-That's it. No global install needed — and you'll always get the latest version automatically.
+That's it. No global install needed. The `@latest` tag ensures you always get the most recent version instead of a cached one.
 
 ```bash
 resume
@@ -26,12 +26,12 @@ resume
 
 ## How to update
 
-If you set up the alias above, updates are automatic — `npx` will pick up the latest version on each run.
+If you used the alias above (with `@latest`), you're always on the newest version — npx resolves it fresh on each run.
 
-To force an immediate update to the latest release:
+If you installed globally, re-run:
 
 ```bash
-npx ai-resume-cli@latest
+npm install -g ai-resume-cli
 ```
 
 ## Controls
