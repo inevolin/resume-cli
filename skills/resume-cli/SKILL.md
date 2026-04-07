@@ -1,16 +1,16 @@
 ---
-name: histd
-description: Interactive session picker — opens histd in the terminal to browse recent AI coding sessions across all tools and resume the selected one.
+name: resume
+description: Interactive session picker — opens resume in the terminal to browse recent AI coding sessions across all tools and resume the selected one.
 ---
 
-# histd — session picker
+# resume — session picker
 
-**Announce at start:** "I'm launching histd to show your recent session history."
+**Announce at start:** "I'm launching resume to show your recent session history."
 
 Run the following shell command to open the interactive picker:
 
 ```bash
-npx github:inevolin/histd
+npx github:inevolin/resume-cli
 ```
 
 This opens an interactive TUI in the terminal:

@@ -1,11 +1,11 @@
 {
-  "name": "histd",
+  "name": "resume-cli",
   "version": "2.0.0",
   "description": "Interactive TUI session picker for AI coding tools (Claude Code, Codex, Copilot).",
   "type": "module",
   "main": "dist/cli.js",
   "bin": {
-    "histd": "dist/cli.js"
+    "resume": "dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/inevolin/histd.git"
+    "url": "git+https://github.com/inevolin/resume-cli.git"
   },
   "keywords": [
     "ai",
@@ -30,9 +30,9 @@
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/inevolin/histd/issues"
+    "url": "https://github.com/inevolin/resume-cli/issues"
   },
-  "homepage": "https://github.com/inevolin/histd#readme",
+  "homepage": "https://github.com/inevolin/resume-cli#readme",
   "dependencies": {
     "ink": "^6.8.0",
     "react": "^19.2.4"

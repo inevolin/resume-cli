@@ -1,26 +1,26 @@
-# histd
+# resume-cli
 
 Interactive TUI session picker for AI coding tools. Lists your recent sessions from Claude Code, Codex, and Copilot in one place — pick one and continue it in any tool.
 
 ## Quick Start
 
 ```bash
-npx github:inevolin/histd
+npx github:inevolin/resume-cli
 ```
 
 No install required. Requires Node.js 18+.
 
-**Optional shell alias:**
+**Optional shell alias** (use any name you like):
 
 ```bash
-echo "alias histd='npx github:inevolin/histd'" >> ~/.zshrc
+echo "alias resume='npx github:inevolin/resume-cli'" >> ~/.zshrc
 source ~/.zshrc
 ```
 
 ## Usage
 
 ```
-histd
+resume
 ```
 
 - **↑ / ↓** — navigate sessions
@@ -35,30 +35,30 @@ Only tools that are installed on your machine appear in the tool cycle list.
 To run from a local clone (e.g. to test a branch before merging):
 
 ```bash
-git clone https://github.com/inevolin/histd
-cd histd
+git clone https://github.com/inevolin/resume-cli
+cd resume-cli
 npm install
 npm run build
 node dist/cli.js
 ```
 
-Or link it globally so you can type `histd` anywhere:
+Or link it globally so you can type `resume` anywhere:
 
 ```bash
-npm link       # run once inside the repo
-histd          # works in any directory
-npm unlink -g histd  # remove when done
+npm link            # run once inside the repo
+resume              # works in any directory
+npm unlink -g resume-cli  # remove when done
 ```
 
 ## Slash command (Claude Code / Codex / Copilot)
 
-Install the `/histd` slash command so you can trigger the session picker from within any AI tool:
+Install the `/resume` slash command so you can trigger the session picker from within any AI tool:
 
 ```bash
-npx skills add inevolin/histd
+npx skills add inevolin/resume-cli
 ```
 
-Then use `/histd` in Claude Code, Codex, or Copilot to open the picker.
+Then use `/resume` in Claude Code, Codex, or Copilot to open the picker.
 
 ## How it works
 

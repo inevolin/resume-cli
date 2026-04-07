@@ -1,6 +1,6 @@
 # Contributing to histd
 
-Thank you for your interest in contributing to histd! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to resume-cli! This document provides guidelines and instructions for contributing.
 
 ## Getting Started
 
@@ -8,7 +8,7 @@ Thank you for your interest in contributing to histd! This document provides gui
 2. **Clone** your fork locally:
    ```bash
    git clone https://github.com/<your-username>/histd.git
-   cd histd
+   cd resume-cli
    ```
 3. **Create a branch** for your change:
    ```bash
@@ -80,11 +80,11 @@ histd is designed to be extended with parsers for additional AI tools. To add su
 
 ## Reporting Issues
 
-- Use the [GitHub issue tracker](https://github.com/inevolin/histd/issues)
+- Use the [GitHub issue tracker](https://github.com/inevolin/resume-cli/issues)
 - Check existing issues before creating a new one
 - Include reproduction steps, expected behaviour, and actual behaviour
 - For bugs, include your OS and Node.js version
 
 ## License
 
-By contributing to histd, you agree that your contributions will be licensed under the [MIT License](LICENSE).
+By contributing to resume-cli, you agree that your contributions will be licensed under the [MIT License](LICENSE).
