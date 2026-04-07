@@ -133,6 +133,15 @@ describe('CodexParser.parse', () => {
     expect(sessions).toHaveLength(0);
   });
 
+  it('sets sessionId from session_meta payload.id', async () => {
+    const file = makeFile([
+      SESSION_META,
+      { type: 'response_item', payload: { role: 'user', content: 'hi' } },
+    ]);
+    const sessions = await parser.parse(file);
+    expect(sessions[0].sessionId).toBe('abc');
+  });
+
   it('falls back to file mtime when no session_meta timestamp', async () => {
     const file = makeFile([
       { type: 'response_item', payload: { role: 'user', content: 'hi' } },

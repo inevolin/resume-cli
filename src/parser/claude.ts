@@ -80,8 +80,9 @@ export class ClaudeParser implements HistoryParser {
     // Derive project path from the immediate parent directory (the encoded project dir).
     // Layout: ~/.claude/projects/<encoded-project-path>/<uuid>.jsonl
     const project = path.dirname(filePath);
+    const sessionId = path.basename(filePath, '.jsonl');
 
-    return [{ tool: 'Claude Code', project, timestamp, messages }];
+    return [{ tool: 'Claude Code', project, timestamp, messages, sessionId }];
   }
 }
 

@@ -97,4 +97,22 @@ describe('ClaudeParser.parse', () => {
 
     fs.rmSync(base, { recursive: true });
   });
+
+  it('sets sessionId to the filename stem', async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'histd-test-'));
+    const line = {
+      type: 'user',
+      timestamp: '2026-04-06T10:00:00Z',
+      message: { role: 'user', content: 'Hello' },
+    };
+    const filePath = path.join(dir, 'abc123-uuid.jsonl');
+    fs.writeFileSync(filePath, JSON.stringify(line) + '\n');
+
+    const p = new ClaudeParser();
+    const sessions = await p.parse(filePath);
+
+    expect(sessions[0].sessionId).toBe(path.basename(filePath, '.jsonl'));
+
+    fs.rmSync(dir, { recursive: true });
+  });
 });

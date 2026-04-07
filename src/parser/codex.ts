@@ -40,6 +40,7 @@ export class CodexParser implements HistoryParser {
     const messages: Message[] = [];
     let sessionTime: Date | null = null;
     let projectCwd: string | null = null;
+    let sessionId: string | null = null;
 
     for (const line of data.split('\n')) {
       const trimmed = line.trim();
@@ -64,6 +65,9 @@ export class CodexParser implements HistoryParser {
         if (!projectCwd && rec.payload.cwd) {
           projectCwd = rec.payload.cwd;
         }
+        if (!sessionId && rec.payload.id) {
+          sessionId = rec.payload.id;
+        }
       }
 
       if (rec.type !== 'response_item') continue;
@@ -84,7 +88,7 @@ export class CodexParser implements HistoryParser {
     const timestamp = sessionTime ?? fileTimestamp(filePath);
     const project = projectCwd ?? path.dirname(filePath);
 
-    return [{ tool: 'Codex', project, timestamp, messages }];
+    return [{ tool: 'Codex', project, timestamp, messages, sessionId: sessionId ?? undefined }];
   }
 }
 
