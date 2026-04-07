@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
 describe('collectAllSessions', () => {
   let tmpDir: string;
@@ -24,22 +25,20 @@ describe('collectAllSessions', () => {
     fs.writeFileSync(path.join(claudeDir, 'uuid-old.jsonl'), JSON.stringify(older) + '\n');
     fs.writeFileSync(path.join(claudeDir, 'uuid-new.jsonl'), JSON.stringify(newer) + '\n');
 
-    jest.doMock('./discovery.js', () => ({
+    const { ClaudeParser } = await import('./parser/claude.js');
+    jest.unstable_mockModule('./discovery.js', () => ({
       getEntries: () => [{
         tool: 'claude-code',
         paths: [path.join(tmpDir, '.claude', 'projects')],
-        parser: new (require('./parser/claude.js').ClaudeParser)(),
+        parser: new ClaudeParser(),
       }],
     }));
 
-    jest.resetModules();
-    const { collectAllSessions: fresh } = require('./sessions.js');
-    const sessions = await fresh(10);
+    const { collectAllSessions } = await import('./sessions.js');
+    const sessions = await collectAllSessions(10);
 
     expect(sessions.length).toBe(2);
     expect(sessions[0].timestamp.getTime()).toBeGreaterThan(sessions[1].timestamp.getTime());
-
-    jest.dontMock('./discovery.js');
   });
 
   it('respects the limit', async () => {
@@ -52,19 +51,17 @@ describe('collectAllSessions', () => {
       fs.writeFileSync(path.join(claudeDir, `uuid-${i}.jsonl`), JSON.stringify(rec) + '\n');
     }
 
-    jest.doMock('./discovery.js', () => ({
+    const { ClaudeParser } = await import('./parser/claude.js');
+    jest.unstable_mockModule('./discovery.js', () => ({
       getEntries: () => [{
         tool: 'claude-code',
         paths: [path.join(tmpDir, '.claude', 'projects')],
-        parser: new (require('./parser/claude.js').ClaudeParser)(),
+        parser: new ClaudeParser(),
       }],
     }));
 
-    jest.resetModules();
-    const { collectAllSessions: fresh } = require('./sessions.js');
-    const sessions = await fresh(3);
+    const { collectAllSessions } = await import('./sessions.js');
+    const sessions = await collectAllSessions(3);
     expect(sessions.length).toBe(3);
-
-    jest.dontMock('./discovery.js');
   });
 });

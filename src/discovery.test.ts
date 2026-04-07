@@ -1,16 +1,18 @@
+import { jest, describe, it, expect, beforeAll } from '@jest/globals';
+
 const FAKE_HOME = '/home/testuser';
 
-jest.mock('os', () => ({
-  ...jest.requireActual('os'),
+jest.unstable_mockModule('os', () => ({
+  default: { homedir: () => FAKE_HOME },
   homedir: () => FAKE_HOME,
 }));
 
 describe('getEntries', () => {
   let getEntries: () => import('./discovery.js').DiscoveryEntry[];
 
-  beforeAll(() => {
-    jest.resetModules();
-    ({ getEntries } = require('./discovery'));
+  beforeAll(async () => {
+    const mod = await import('./discovery.js');
+    getEntries = mod.getEntries;
   });
 
   it('includes claude-code pointing at ~/.claude/projects', () => {
