@@ -25,7 +25,6 @@ function commandExists(cmd: string): boolean {
   }
 }
 
-
 async function main(): Promise<void> {
   const [sessions, installedTools] = await Promise.all([
     collectAllSessions(50),
@@ -33,7 +32,7 @@ async function main(): Promise<void> {
   ]);
 
   if (installedTools.length === 0) {
-    process.stderr.write('resume-cli: no supported AI tools detected (claude, codex, gh copilot)\n');
+    process.stderr.write('resume-cli: no supported AI tools detected (claude, codex, copilot)\n');
     process.exit(1);
   }
 
@@ -59,6 +58,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-  process.stderr.write(`histd: fatal: ${err}\n`);
+  process.stderr.write(`resume-cli: fatal: ${err}\n`);
   process.exit(1);
 });
