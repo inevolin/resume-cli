@@ -1,49 +1,14 @@
 #!/usr/bin/env node
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-const mcp_js_1 = require("@modelcontextprotocol/sdk/server/mcp.js");
-const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
-const zod_1 = require("zod");
-const fs = __importStar(require("fs"));
-const path = __importStar(require("path"));
-const discovery_js_1 = require("./discovery.js");
-const server = new mcp_js_1.McpServer({ name: 'histd', version: '1.0.0' });
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { z } from 'zod';
+import * as fs from 'fs';
+import * as path from 'path';
+import { getEntries } from './discovery.js';
+const server = new McpServer({ name: 'histd', version: '1.0.0' });
 server.tool('get_recent_context', 'Retrieve recent AI coding session history for a project to restore context when switching between AI tools (Claude Code, Cursor, Copilot, Codex).', {
-    project_path: zod_1.z.string().describe('Absolute path to the project directory (e.g. /Users/you/my-project)'),
-    limit: zod_1.z.number().int().min(1).max(50).optional().describe('Maximum number of sessions to return (default: 5)'),
+    project_path: z.string().describe('Absolute path to the project directory (e.g. /Users/you/my-project)'),
+    limit: z.number().int().min(1).max(50).optional().describe('Maximum number of sessions to return (default: 5)'),
 }, async ({ project_path, limit = 5 }) => {
     const sessions = await collectSessions(project_path, limit);
     if (sessions.length === 0) {
@@ -56,7 +21,7 @@ server.tool('get_recent_context', 'Retrieve recent AI coding session history for
     };
 });
 async function collectSessions(projectPath, limit) {
-    const entries = (0, discovery_js_1.getEntries)();
+    const entries = getEntries();
     const all = [];
     for (const entry of entries) {
         for (const dir of entry.paths) {
@@ -142,7 +107,7 @@ function formatSessions(sessions) {
         .join('\n\n');
 }
 async function main() {
-    const transport = new stdio_js_1.StdioServerTransport();
+    const transport = new StdioServerTransport();
     await server.connect(transport);
 }
 main().catch((err) => {
