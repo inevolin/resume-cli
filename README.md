@@ -12,22 +12,15 @@ Continue in: ◀ Claude Code ▶   ↑↓ navigate · tab: switch tool · ↵ la
 
 ## Quick start
 
-```bash
-npx ai-resume-cli
-```
-
-No install required. Requires Node.js 18+.
-
-**Optional global install:**
-
-```bash
-npm install -g ai-resume-cli
-```
-
-**Optional shell alias:**
+Add this alias to your shell — then just type `resume` from anywhere:
 
 ```bash
 echo "alias resume='npx ai-resume-cli'" >> ~/.zshrc && source ~/.zshrc
+```
+
+That's it. No global install needed.
+
+```bash
 resume
 ```
 
