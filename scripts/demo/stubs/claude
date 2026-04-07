@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Stub: simulates a Claude Code session that has hit the context window limit.
+# Used exclusively by the VHS demo recording.
+
+printf '\n'
+printf '  ╭──────────────────────────────────────────╮\n'
+printf '  │  Claude Code  (claude-opus-4)             │\n'
+printf '  ╰──────────────────────────────────────────╯\n'
+printf '\n'
+printf '  > add auth middleware and JWT validation\n'
+printf '\n'
+sleep 0.4
+printf '  ● Writing src/middleware/auth.ts ...\n'
+sleep 0.3
+printf '  ● Writing src/middleware/rateLimiter.ts ...\n'
+sleep 0.3
+printf '  ● Updating src/router.ts ...\n'
+sleep 0.5
+printf '\n'
+printf '  ✖  Context window limit reached (200 000 tokens)\n'
+printf '     This session cannot continue in Claude Code.\n'
+printf '\n'
+printf '  Tip: run '\''resume'\'' to pick up this session in another tool.\n'
+printf '\n'
