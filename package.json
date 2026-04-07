@@ -1,5 +1,5 @@
 {
-  "name": "resume-cli",
+  "name": "ai-resume-cli",
   "version": "3.2.0",
   "description": "Interactive TUI session picker for AI coding tools (Claude Code, Codex, Copilot).",
   "type": "module",

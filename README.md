@@ -5,7 +5,7 @@ Interactive TUI session picker for AI coding tools. Lists your recent sessions f
 ## Quick Start
 
 ```bash
-npx resume-cli
+npx ai-resume-cli
 ```
 
 No install required. Requires Node.js 18+.
@@ -13,13 +13,13 @@ No install required. Requires Node.js 18+.
 **Optional global install:**
 
 ```bash
-npm install -g resume-cli
+npm install -g ai-resume-cli
 ```
 
 **Optional shell alias** (use any name you like):
 
 ```bash
-echo "alias resume='npx resume-cli'" >> ~/.zshrc
+echo "alias resume='npx ai-resume-cli'" >> ~/.zshrc
 source ~/.zshrc
 ```
 
