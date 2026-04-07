@@ -2,10 +2,10 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testMatch: ['**/src/**/*.test.ts'],
-  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.test.ts'],
+  testMatch: ['**/src/**/*.test.ts', '**/src/**/*.test.tsx'],
+  collectCoverageFrom: ['src/**/*.ts', 'src/**/*.tsx', '!src/**/*.test.ts', '!src/**/*.test.tsx'],
   transform: {
-    '^.+\\.tsx?$': ['ts-jest', { tsconfig: { isolatedModules: true } }],
+    '^.+\\.tsx?$': ['ts-jest', { tsconfig: { isolatedModules: true, jsx: 'react-jsx' } }],
   },
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
