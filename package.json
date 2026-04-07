@@ -2,9 +2,10 @@
   "name": "histd",
   "version": "1.0.0",
   "description": "MCP server that lets AI agents query your cross-tool coding session history (Claude Code, Cursor, Copilot, Codex).",
+  "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "histd": "dist/index.js"
+    "histd": "dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
