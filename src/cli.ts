@@ -41,7 +41,7 @@ async function main(): Promise<void> {
   ]);
 
   if (installedTools.length === 0) {
-    process.stderr.write('histd: no supported AI tools detected (claude, codex, gh copilot)\n');
+    process.stderr.write('resume-cli: no supported AI tools detected (claude, codex, gh copilot)\n');
     process.exit(1);
   }
 
@@ -53,7 +53,8 @@ async function main(): Promise<void> {
       installedTools,
       onLaunch: (session: Session, tool: string) => {
         launched = true;
-        launch(session, tool);
+        const resumeId = launch(session, tool);
+        process.stderr.write(`resume-cli: launching ${tool} --resume ${resumeId}\n`);
       },
     })
   );

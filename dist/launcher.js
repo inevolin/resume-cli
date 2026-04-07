@@ -155,6 +155,7 @@ export function launch(session, targetTool) {
     }
     const [cmd, args] = buildCommand(targetTool, resumeId);
     childProcess.spawn(cmd, args, { stdio: 'inherit', detached: false });
+    return resumeId;
 }
 function normalizeTool(tool) {
     return tool.toLowerCase().replace(/\s+/g, '');
