@@ -1,9 +1,9 @@
 {
   "name": "histd",
-  "version": "1.0.0",
-  "description": "MCP server that lets AI agents query your cross-tool coding session history (Claude Code, Cursor, Copilot, Codex).",
+  "version": "2.0.0",
+  "description": "Interactive TUI session picker for AI coding tools (Claude Code, Codex, Copilot).",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/cli.js",
   "bin": {
     "histd": "dist/cli.js"
   },
@@ -34,14 +34,10 @@
   },
   "homepage": "https://github.com/inevolin/histd#readme",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "better-sqlite3": "^11.10.0",
     "ink": "^6.8.0",
-    "react": "^19.2.4",
-    "zod": "^4.3.6"
+    "react": "^19.2.4"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.12",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.15.2",
     "@types/react": "^19.2.14",
