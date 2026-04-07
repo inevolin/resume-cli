@@ -114,9 +114,15 @@ export function writeSyntheticCopilot(session: Session, targetDir: string): stri
 export function launch(session: Session, targetTool: string): void {
   const home = os.homedir();
   const isSameTool = normalizeTool(session.tool) === normalizeTool(targetTool);
-  const resumeId = isSameTool
-    ? (session.sessionId ?? '')
-    : createSyntheticSession(session, targetTool, home);
+  let resumeId: string;
+  if (isSameTool) {
+    if (!session.sessionId) {
+      throw new Error(`Cannot resume ${session.tool} session: session ID is missing. Try cross-tool resume instead.`);
+    }
+    resumeId = session.sessionId;
+  } else {
+    resumeId = createSyntheticSession(session, targetTool, home);
+  }
 
   const [cmd, args] = buildCommand(targetTool, resumeId);
   childProcess.spawn(cmd, args, { stdio: 'inherit', detached: false });

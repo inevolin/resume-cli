@@ -77,7 +77,7 @@ describe('ClaudeParser.parse', () => {
     fs.rmSync(dir, { recursive: true });
   });
 
-  it('should set project to the immediate parent directory', async () => {
+  it('should decode the encoded project directory name back to a real path', async () => {
     const base = fs.mkdtempSync(path.join(os.tmpdir(), 'histd-test-'));
     // Simulate ~/.claude/projects/-Users-ilya-myproject/session.jsonl
     const projectDir = path.join(base, '-Users-ilya-myproject');
@@ -93,7 +93,8 @@ describe('ClaudeParser.parse', () => {
     const p = new ClaudeParser();
     const sessions = await p.parse(filePath);
 
-    expect(sessions[0].project).toBe(projectDir);
+    // "-Users-ilya-myproject" decodes to "/Users/ilya/myproject"
+    expect(sessions[0].project).toBe('/Users/ilya/myproject');
 
     fs.rmSync(base, { recursive: true });
   });
