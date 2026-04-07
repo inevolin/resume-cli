@@ -48,7 +48,9 @@ export function writeSyntheticCodex(session: Session, targetDir: string): { uuid
   const dd = String(d.getDate()).padStart(2, '0');
   const dir = path.join(targetDir, yyyy, mm, dd);
   fs.mkdirSync(dir, { recursive: true });
-  const filePath = path.join(dir, `rollout-${Date.now()}.jsonl`);
+  // Codex finds sessions by UUID in the filename: rollout-<ISO-datetime>-<uuid>.jsonl
+  const isoSlug = new Date().toISOString().replace(/[:.]/g, '-').replace('Z', '');
+  const filePath = path.join(dir, `rollout-${isoSlug}-${uuid}.jsonl`);
 
   const lines: object[] = [
     {
