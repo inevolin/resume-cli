@@ -3,15 +3,15 @@ import React from 'react';
 import { render } from 'ink';
 import * as childProcess from 'child_process';
 import { collectAllSessions } from './sessions.js';
-import { launch } from './launcher.js';
+import { buildCommand } from './launcher.js';
 import type { Session } from './parser/types.js';
 import { App } from './tui/App.js';
 
 async function detectInstalledTools(): Promise<string[]> {
   const candidates: Array<{ name: string; check: () => boolean }> = [
     { name: 'Claude Code', check: () => commandExists('claude') },
-    { name: 'Codex', check: () => commandExists('codex') },
-    { name: 'Copilot', check: () => commandExists('copilot') },
+    { name: 'Codex',       check: () => commandExists('codex') },
+    { name: 'Copilot',     check: () => commandExists('copilot') },
   ];
   return candidates.filter((t) => t.check()).map((t) => t.name);
 }
@@ -39,6 +39,9 @@ async function main(): Promise<void> {
 
   let pendingLaunch: { session: Session; tool: string } | null = null as { session: Session; tool: string } | null;
 
+  // Render TUI to stderr so stdout stays clean for command capture.
+  // Shell function usage: cmd=$(npx ai-resume-cli@latest)
+  //   stderr → /dev/tty (visible TUI), stdout → captured command string
   const { waitUntilExit } = render(
     React.createElement(App, {
       sessions,
@@ -46,20 +49,28 @@ async function main(): Promise<void> {
       onLaunch: (session: Session, tool: string) => {
         pendingLaunch = { session, tool };
       },
-    })
+    }),
+    { stdout: process.stderr },
   );
 
   await waitUntilExit();
 
-  // Launch AFTER Ink has fully restored the terminal (raw mode off, cursor restored).
-  // On Windows, spawning before Ink finishes cleanup causes the Console to become
-  // unresponsive because two processes race over raw-mode ownership.
-  if (pendingLaunch) {
-    process.stderr.write(`resume-cli: launching ${pendingLaunch.tool}\n`);
-    launch(pendingLaunch.session, pendingLaunch.tool);
-  } else {
-    process.exit(0);
+  if (!pendingLaunch) {
+    // User quit without selecting — shell function checks exit code and does nothing.
+    process.exit(1);
   }
+
+  const cmd = buildCommand(pendingLaunch.session, pendingLaunch.tool);
+
+  // When stdout is a TTY the user ran us directly (not via shell function).
+  // Print a hint so they know how to get seamless execution.
+  if (process.stdout.isTTY) {
+    process.stderr.write('\nTo run automatically, use the resume shell function:\n');
+    process.stderr.write('https://github.com/inevolin/resume-cli#quick-start\n\n');
+  }
+
+  process.stdout.write(cmd + '\n');
+  process.exit(0);
 }
 
 main().catch((err: unknown) => {

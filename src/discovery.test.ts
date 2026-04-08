@@ -1,4 +1,5 @@
 import { jest, describe, it, expect, beforeAll } from '@jest/globals';
+import * as path from 'path';
 
 const FAKE_HOME = '/home/testuser';
 
@@ -18,17 +19,17 @@ describe('getEntries', () => {
   it('includes claude-code pointing at ~/.claude/projects', () => {
     const entry = getEntries().find((e) => e.tool === 'claude-code');
     expect(entry).toBeDefined();
-    expect(entry!.paths).toContain(`${FAKE_HOME}/.claude/projects`);
+    expect(entry!.paths).toContain(path.join(FAKE_HOME, '.claude', 'projects'));
   });
 
   it('includes copilot pointing at ~/.copilot/session-state', () => {
     const entry = getEntries().find((e) => e.tool === 'copilot');
-    expect(entry!.paths).toContain(`${FAKE_HOME}/.copilot/session-state`);
+    expect(entry!.paths).toContain(path.join(FAKE_HOME, '.copilot', 'session-state'));
   });
 
   it('includes codex pointing at ~/.codex/sessions', () => {
     const entry = getEntries().find((e) => e.tool === 'codex');
-    expect(entry!.paths).toContain(`${FAKE_HOME}/.codex/sessions`);
+    expect(entry!.paths).toContain(path.join(FAKE_HOME, '.codex', 'sessions'));
   });
 
   it('returns exactly 3 entries', () => {

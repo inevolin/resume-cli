@@ -12,24 +12,45 @@ Continue in: ◀ Claude Code ▶   ↑↓ navigate · tab: switch tool · ↵ la
 
 ## Quick start
 
-Add this alias to your shell — then just type `resume` from anywhere:
+Add the `resume` shell function to your shell profile — then just type `resume` from anywhere.
 
-**zsh:**
+**bash** — add to `~/.bashrc`:
 ```bash
-echo "alias resume='npx ai-resume-cli@latest'" >> ~/.zshrc && source ~/.zshrc
+resume() {
+  local cmd
+  cmd=$(FORCE_COLOR=3 npx ai-resume-cli@latest 2>/dev/tty)
+  [ $? -eq 0 ] && [ -n "$cmd" ] && eval "$cmd"
+}
 ```
 
-**bash:**
-```bash
-echo "alias resume='npx ai-resume-cli@latest'" >> ~/.bashrc && source ~/.bashrc
+**zsh** — add to `~/.zshrc`:
+```zsh
+resume() {
+  local cmd
+  cmd=$(FORCE_COLOR=3 npx ai-resume-cli@latest 2>/dev/tty)
+  [ $? -eq 0 ] && [ -n "$cmd" ] && eval "$cmd"
+}
 ```
 
-**fish:**
-```bash
-echo "alias resume='npx ai-resume-cli@latest'" >> ~/.config/fish/config.fish
+**fish** — add to `~/.config/fish/config.fish`:
+```fish
+function resume
+    set cmd (FORCE_COLOR=3 npx ai-resume-cli@latest 2>/dev/tty)
+    if test $status -eq 0; and test -n "$cmd"
+        eval $cmd
+    end
+end
 ```
 
-That's it. No global install needed. The `@latest` tag ensures you always get the most recent version instead of a cached one.
+**PowerShell (Windows)** — add to your `$PROFILE`:
+```powershell
+function resume {
+    $cmd = npx ai-resume-cli@latest
+    if ($LASTEXITCODE -eq 0 -and $cmd) { Invoke-Expression $cmd }
+}
+```
+
+Reload your shell (or open a new terminal), then:
 
 ```bash
 resume
@@ -37,13 +58,9 @@ resume
 
 ## How to update
 
-If you used the alias above (with `@latest`), you're always on the newest version — npx resolves it fresh on each run.
+The `@latest` tag in the function means npx always fetches the newest version. No action needed.
 
-If you installed globally, re-run:
-
-```bash
-npm install -g ai-resume-cli
-```
+If you want a specific version, replace `@latest` with e.g. `@1.1.0`.
 
 ## Controls
 
@@ -70,10 +87,12 @@ Sessions are read directly from each tool's local storage:
 
 **Cross-tool resume** starts the target tool with an initial message pointing to the original session file. The AI reads it and continues from where you left off, with full conversation history as context.
 
+The CLI prints the resulting command to stdout and exits. The shell function captures it and runs it in your current shell — this is why terminal ownership is always clean, on every platform.
+
 ## Requirements
 
 - Node.js 18+
-- macOS or Linux
+- macOS, Linux, or Windows (PowerShell or Git Bash)
 - At least one of: [Claude Code](https://claude.ai/code), [Codex](https://github.com/openai/codex), [Copilot CLI](https://docs.github.com/copilot/how-tos/copilot-cli)
 
 ## Local development
@@ -98,6 +117,7 @@ Run tests:
 
 ```bash
 npm test
+npm run test:integration
 ```
 
 ## Contributing

@@ -29,10 +29,8 @@ interface ContentBlock {
  */
 export class CodexParser implements HistoryParser {
   canHandle(filePath: string): boolean {
-    return (
-      filePath.endsWith('.jsonl') &&
-      filePath.includes(`${path.sep}.codex${path.sep}sessions${path.sep}`)
-    );
+    // Match both Unix (/) and Windows (\) separators.
+    return filePath.endsWith('.jsonl') && /[/\\]\.codex[/\\]sessions[/\\]/.test(filePath);
   }
 
   async parse(filePath: string): Promise<Session[]> {

@@ -1,5 +1,5 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { launch } from './launcher.js';
+import { describe, it, expect } from '@jest/globals';
+import { buildCommand } from './launcher.js';
 import type { Session } from './parser/types.js';
 
 const copilotSession: Session = {
@@ -26,64 +26,59 @@ const claudeSession: Session = {
   filePath: '/Users/ilya/.claude/projects/-Users-ilya-project/claude-uuid.jsonl',
 };
 
-let spawnFn: jest.Mock;
-
-beforeEach(() => {
-  spawnFn = jest.fn();
-});
-
-describe('launch — same-tool resume', () => {
-  it('resumes Claude Code with --resume flag', () => {
-    launch(claudeSession, 'Claude Code', spawnFn as never);
-    expect(spawnFn).toHaveBeenCalledWith(
-      'claude',
-      ['--resume', 'claude-uuid'],
-      expect.objectContaining({ cwd: '/Users/ilya/project' })
-    );
+describe('buildCommand — same-tool resume', () => {
+  it('returns claude --resume command', () => {
+    expect(buildCommand(claudeSession, 'Claude Code')).toBe('claude --resume claude-uuid');
   });
 
-  it('resumes Copilot with --resume flag', () => {
-    launch(copilotSession, 'Copilot', spawnFn as never);
-    expect(spawnFn).toHaveBeenCalledWith(
-      'copilot',
-      ['--resume=copilot-uuid'],
-      expect.objectContaining({ cwd: '/Users/ilya/project' })
-    );
+  it('returns codex resume command', () => {
+    const codexSession: Session = { ...claudeSession, tool: 'Codex', sessionId: 'codex-uuid' };
+    expect(buildCommand(codexSession, 'Codex')).toBe('codex resume codex-uuid');
+  });
+
+  it('returns copilot --resume= command', () => {
+    expect(buildCommand(copilotSession, 'Copilot')).toBe('copilot --resume=copilot-uuid');
   });
 });
 
-describe('launch — cross-tool resume', () => {
-  it('starts Claude Code with the source file path in the prompt', () => {
-    launch(copilotSession, 'Claude Code', spawnFn as never);
-    const [cmd, args] = spawnFn.mock.calls[0] as [string, string[]];
-    expect(cmd).toBe('claude');
-    expect(args[0]).toContain(copilotSession.filePath);
+describe('buildCommand — cross-tool (fresh start)', () => {
+  it('starts Claude Code with the source file path quoted in prompt', () => {
+    const cmd = buildCommand(copilotSession, 'Claude Code');
+    expect(cmd).toMatch(/^claude ".*copilot-uuid.*"$/s);
   });
 
-  it('starts Copilot with -i flag and source file path', () => {
-    launch(claudeSession, 'Copilot', spawnFn as never);
-    const [cmd, args] = spawnFn.mock.calls[0] as [string, string[]];
-    expect(cmd).toBe('copilot');
-    expect(args[0]).toBe('-i');
-    expect(args[1]).toContain(claudeSession.filePath);
+  it('starts Codex with the source file path quoted in prompt', () => {
+    const cmd = buildCommand(claudeSession, 'Codex');
+    expect(cmd).toMatch(/^codex ".*claude-uuid.*"$/s);
   });
 
-  it('starts in the session project directory', () => {
-    launch(copilotSession, 'Claude Code', spawnFn as never);
-    expect(spawnFn).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.any(Array),
-      expect.objectContaining({ cwd: '/Users/ilya/project' })
-    );
+  it('starts Copilot with -i flag and quoted prompt', () => {
+    const cmd = buildCommand(claudeSession, 'Copilot');
+    expect(cmd).toMatch(/^copilot -i ".*claude-uuid.*"$/s);
   });
 });
 
-describe('launch — same-tool without sessionId', () => {
+describe('buildCommand — same-tool without sessionId', () => {
   it('falls back to fresh command when sessionId is missing', () => {
     const sessionWithoutId: Session = { ...copilotSession, sessionId: undefined };
-    launch(sessionWithoutId, 'Copilot', spawnFn as never);
-    const [cmd, args] = spawnFn.mock.calls[0] as [string, string[]];
-    expect(cmd).toBe('copilot');
-    expect(args[0]).toBe('-i');
+    const cmd = buildCommand(sessionWithoutId, 'Copilot');
+    expect(cmd).toMatch(/^copilot -i ".*"$/s);
+  });
+});
+
+describe('shellEscape — via buildCommand output', () => {
+  it('does not quote simple alphanumeric UUIDs', () => {
+    expect(buildCommand(claudeSession, 'Claude Code')).toBe('claude --resume claude-uuid');
+  });
+
+  it('double-quotes strings with spaces', () => {
+    const session: Session = {
+      ...claudeSession,
+      tool: 'Codex',
+      sessionId: undefined,
+      filePath: '/path with spaces/file.jsonl',
+    };
+    const cmd = buildCommand(session, 'Codex');
+    expect(cmd).toContain('"');
   });
 });
