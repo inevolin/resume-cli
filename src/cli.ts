@@ -39,6 +39,13 @@ async function main(): Promise<void> {
 
   let pendingLaunch: { session: Session; tool: string } | null = null as { session: Session; tool: string } | null;
 
+  // When stdout is captured by the shell function (pipe), chalk's color
+  // detection sees a non-TTY stdout and strips colors. Force it on when
+  // stderr (where we render) is a real terminal.
+  if (process.stderr.isTTY && !process.env.FORCE_COLOR) {
+    process.env.FORCE_COLOR = '1';
+  }
+
   // Render TUI to stderr so stdout stays clean for command capture.
   // Shell function usage: cmd=$(npx ai-resume-cli@latest)
   //   stderr → /dev/tty (visible TUI), stdout → captured command string
