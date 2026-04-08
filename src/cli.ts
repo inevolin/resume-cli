@@ -37,23 +37,27 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  let launched = false;
+  let pendingLaunch: { session: Session; tool: string } | null = null as { session: Session; tool: string } | null;
 
   const { waitUntilExit } = render(
     React.createElement(App, {
       sessions,
       installedTools,
       onLaunch: (session: Session, tool: string) => {
-        launched = true;
-        process.stderr.write(`resume-cli: launching ${tool}\n`);
-        launch(session, tool);
+        pendingLaunch = { session, tool };
       },
     })
   );
 
   await waitUntilExit();
 
-  if (!launched) {
+  // Launch AFTER Ink has fully restored the terminal (raw mode off, cursor restored).
+  // On Windows, spawning before Ink finishes cleanup causes the Console to become
+  // unresponsive because two processes race over raw-mode ownership.
+  if (pendingLaunch) {
+    process.stderr.write(`resume-cli: launching ${pendingLaunch.tool}\n`);
+    launch(pendingLaunch.session, pendingLaunch.tool);
+  } else {
     process.exit(0);
   }
 }
