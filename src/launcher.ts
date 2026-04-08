@@ -6,9 +6,11 @@ type SpawnFn = typeof childProcess.spawn;
 export function launch(session: Session, targetTool: string, spawnFn: SpawnFn = childProcess.spawn): void {
   const isSameTool = normalizeTool(session.tool) === normalizeTool(targetTool);
 
+  const spawnOpts = { stdio: 'inherit', detached: false, cwd: session.project } as const;
+
   if (isSameTool && session.sessionId) {
     const [cmd, args] = buildResumeCommand(targetTool, session.sessionId);
-    spawnFn(cmd, args, { stdio: 'inherit', detached: false, cwd: session.project });
+    spawnWindows(spawnFn, cmd, args, spawnOpts);
     return;
   }
 
@@ -16,7 +18,20 @@ export function launch(session: Session, targetTool: string, spawnFn: SpawnFn = 
   const sourceFile = session.filePath ?? 'unknown';
   const prompt = `Continue the conversation from the session history stored in this file: ${sourceFile}\n\nRead that file to understand our previous conversation, then let me know you're ready to continue.`;
   const [cmd, args] = buildFreshCommand(targetTool, prompt);
-  spawnFn(cmd, args, { stdio: 'inherit', detached: false, cwd: session.project });
+  spawnWindows(spawnFn, cmd, args, spawnOpts);
+}
+
+function spawnWindows(spawnFn: SpawnFn, cmd: string, args: string[], opts: childProcess.SpawnOptions): void {
+  if (process.platform !== 'win32') {
+    spawnFn(cmd, args, opts);
+    return;
+  }
+  // On Windows, .cmd files cannot be spawned without shell:true.
+  // With shell:true Node joins cmd+args into a string that the shell word-splits,
+  // so we construct the quoted command string ourselves.
+  const quote = (s: string) => `"${s.replace(/\r?\n/g, ' ').replace(/"/g, '""')}"`;
+  const fullCmd = [cmd, ...args.map(quote)].join(' ');
+  spawnFn(fullCmd, [], { ...opts, shell: true });
 }
 
 function normalizeTool(tool: string): string {

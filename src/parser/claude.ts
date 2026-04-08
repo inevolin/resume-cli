@@ -78,17 +78,74 @@ export class ClaudeParser implements HistoryParser {
     const timestamp = sessionTime ?? new Date();
 
     // Attempt to decode the Claude-encoded project path back to a real filesystem path.
-    // Claude encodes project paths by replacing all non-alphanumeric chars with '-',
-    // so "/Users/ilya/myproject" becomes "-Users-ilya-myproject". The decode is lossy (dots also
-    // become '-'), but works correctly for typical paths without dots in directory names.
+    // Claude encodes project paths by replacing all non-alphanumeric chars with '-':
+    //   Unix:    "/Users/ilya/my-project"      → "-Users-ilya-my-project"
+    //   Windows: "C:\Users\ilya\my-project"    → "C--Users-ilya-my-project"
+    // The encoding is lossy (hyphens in dir names are indistinguishable from separators),
+    // so we verify each candidate segment against the real filesystem.
     const encodedName = path.basename(path.dirname(filePath));
-    const project = encodedName.startsWith('-')
-      ? '/' + encodedName.slice(1).replace(/-/g, '/')
-      : path.dirname(filePath);
+    const project = decodeClaudePath(encodedName);
     const sessionId = path.basename(filePath, '.jsonl');
 
     return [{ tool: 'Claude Code', project, timestamp, messages, sessionId, filePath }];
   }
+}
+
+/**
+ * Decodes a Claude-encoded project directory name back to a real filesystem path.
+ *
+ * Claude encodes paths by replacing every non-alphanumeric character with '-':
+ *   Unix:    /Users/ilya/my-project  →  -Users-ilya-my-project
+ *   Windows: C:\Users\ilya\my-proj   →  C--Users-ilya-my-proj
+ *
+ * Because hyphens in directory names are indistinguishable from separators we
+ * verify candidates against the real filesystem, greedily taking the longest
+ * segment that exists at each level.
+ */
+function decodeClaudePath(encoded: string): string {
+  let root: string;
+  let rest: string;
+
+  const winMatch = encoded.match(/^([A-Za-z])--(.*)$/);
+  if (winMatch) {
+    // Windows path: "C--Users-foo-bar" → root "C:\", rest "Users-foo-bar"
+    root = winMatch[1].toUpperCase() + ':\\';
+    rest = winMatch[2];
+  } else if (encoded.startsWith('-')) {
+    // Unix path: "-Users-foo-bar" → root "/", rest "Users-foo-bar"
+    root = '/';
+    rest = encoded.slice(1);
+  } else {
+    return encoded; // unrecognised format — return as-is
+  }
+
+  const sep = winMatch ? '\\' : '/';
+  const parts = rest.split('-');
+  let current = root;
+  let i = 0;
+
+  while (i < parts.length) {
+    // Try progressively shorter joins (longest match first) so "resume-cli"
+    // is preferred over treating "-" as a separator.
+    let matched = false;
+    for (let j = parts.length; j > i; j--) {
+      const segment = parts.slice(i, j).join('-');
+      const candidate = current + segment;
+      if (fs.existsSync(candidate)) {
+        current = candidate + sep;
+        i = j;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
+      // Filesystem lookup failed — append remaining parts separated by sep.
+      current += parts.slice(i).join(sep);
+      break;
+    }
+  }
+
+  return current.replace(/[/\\]$/, ''); // strip trailing separator
 }
 
 /**

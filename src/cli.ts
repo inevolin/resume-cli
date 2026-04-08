@@ -18,7 +18,8 @@ async function detectInstalledTools(): Promise<string[]> {
 
 function commandExists(cmd: string): boolean {
   try {
-    childProcess.execSync(`which ${cmd}`, { stdio: 'ignore' });
+    const check = process.platform === 'win32' ? `where ${cmd}` : `which ${cmd}`;
+    childProcess.execSync(check, { stdio: 'ignore' });
     return true;
   } catch {
     return false;
