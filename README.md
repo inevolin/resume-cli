@@ -18,7 +18,7 @@ Add the `resume` shell function to your shell profile — then just type `resume
 ```bash
 resume() {
   local cmd
-  cmd=$(npx ai-resume-cli@latest 2>/dev/tty)
+  cmd=$(FORCE_COLOR=3 npx ai-resume-cli@latest 2>/dev/tty)
   [ $? -eq 0 ] && [ -n "$cmd" ] && eval "$cmd"
 }
 ```
@@ -27,7 +27,7 @@ resume() {
 ```zsh
 resume() {
   local cmd
-  cmd=$(npx ai-resume-cli@latest 2>/dev/tty)
+  cmd=$(FORCE_COLOR=3 npx ai-resume-cli@latest 2>/dev/tty)
   [ $? -eq 0 ] && [ -n "$cmd" ] && eval "$cmd"
 }
 ```
@@ -35,7 +35,7 @@ resume() {
 **fish** — add to `~/.config/fish/config.fish`:
 ```fish
 function resume
-    set cmd (npx ai-resume-cli@latest 2>/dev/tty)
+    set cmd (FORCE_COLOR=3 npx ai-resume-cli@latest 2>/dev/tty)
     if test $status -eq 0; and test -n "$cmd"
         eval $cmd
     end

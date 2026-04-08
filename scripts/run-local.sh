@@ -12,7 +12,7 @@ cd "$ROOT"
 npm run build
 
 echo "Launching..."
-cmd=$(node dist/cli.js 2>/dev/tty)
+cmd=$(FORCE_COLOR=3 node dist/cli.js 2>/dev/tty)
 if [ $? -eq 0 ] && [ -n "$cmd" ]; then
   echo "Running: $cmd"
   eval "$cmd"
