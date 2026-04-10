@@ -12,6 +12,8 @@ Continue in: ◀ Claude Code ▶   ↑↓ navigate · tab: switch tool · ↵ la
 
 ## Quick start
 
+Quickest way: Ask your AI agent to install this tool for you ;)
+
 Add the `resume` shell function to your shell profile — then just type `resume` from anywhere.
 
 **bash** — add to `~/.bashrc`:
